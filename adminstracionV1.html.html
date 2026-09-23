@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración General - Distribuidora Comparto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-start lg:p-4">
+
+  <!-- PANTALLA DE BLOQUEO POR PIN ADMINISTRATIVO -->
+  <div id="pantalla-login-admin" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-7 text-center space-y-6 shadow-2xl">
+      <div>
+        <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+        <h2 class="text-xl font-black text-white mt-1">ACCESO ADMINISTRATIVO</h2>
+        <p class="text-xs text-slate-400">Selecciona tu perfil e ingresa tu PIN de seguridad</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="window.seleccionarAdmin('Miguel')" id="btn-user-miguel" class="p-3 rounded-2xl border border-indigo-600 bg-indigo-600/30 text-white font-black text-xs">
+          👤 Miguel
+        </button>
+        <button type="button" onclick="window.seleccionarAdmin('Diego')" id="btn-user-diego" class="p-3 rounded-2xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs">
+          👤 Diego
+        </button>
+        <button type="button" onclick="window.seleccionarAdmin('Rodrigo')" id="btn-user-rodrigo" class="p-3 rounded-2xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs">
+          👤 Rodrigo
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <input type="password" id="input-pin-admin" readonly maxlength="4" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 text-center text-3xl font-black text-emerald-400 tracking-[0.5em] outline-none">
+        
+        <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+          <button type="button" onclick="window.teclearPin('1')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">1</button>
+          <button type="button" onclick="window.teclearPin('2')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">2</button>
+          <button type="button" onclick="window.teclearPin('3')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">3</button>
+          <button type="button" onclick="window.teclearPin('4')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">4</button>
+          <button type="button" onclick="window.teclearPin('5')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">5</button>
+          <button type="button" onclick="window.teclearPin('6')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">6</button>
+          <button type="button" onclick="window.teclearPin('7')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">7</button>
+          <button type="button" onclick="window.teclearPin('8')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">8</button>
+          <button type="button" onclick="window.teclearPin('9')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">9</button>
+          <button type="button" onclick="window.borrarPin()" class="h-12 rounded-xl bg-rose-950/40 text-rose-400 font-bold text-sm active:scale-95">Borrar</button>
+          <button type="button" onclick="window.teclearPin('0')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">0</button>
+          <button type="button" onclick="window.validarAccesoAdmin()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL ERP -->
+  <div class="w-full max-w-[1700px] bg-slate-100 min-h-screen lg:min-h-[950px] lg:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden pb-12">
+
+    <!-- CABECERA -->
+    <header class="bg-slate-950 text-white p-4 lg:px-8 lg:py-5 shadow-md sticky top-0 z-30 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+          <span class="text-[10px] bg-indigo-900/60 text-indigo-300 px-2 py-0.5 rounded font-black border border-indigo-700/50">SISTEMA GERENCIAL</span>
+          <span id="badge-admin-activo" class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded font-black border border-emerald-700">SESIÓN: RODRIGO</span>
+        </div>
+        <h1 class="font-black text-xl lg:text-2xl leading-tight">PANEL MAESTRO DE ADMINISTRACIÓN</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Control Central de Inventario, Flota, Comisiones y P&G</p>
+      </div>
+
+      <!-- MENÚ PRINCIPAL -->
+      <nav class="flex flex-wrap items-center gap-1.5 bg-slate-900 p-1.5 rounded-2xl border border-slate-800 text-xs">
+        <button type="button" onclick="window.cambiarSeccion('pyg')" id="btn-nav-pyg" class="px-3.5 py-2 rounded-xl font-black bg-indigo-600 text-white shadow-md transition-all">
+          📈 P&G y Balance
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('inventario')" id="btn-nav-inventario" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          📦 Inventario & Precios
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('clientes')" id="btn-nav-clientes" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          👥 Clientes & Crédito
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('equipo')" id="btn-nav-equipo" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          🚚 Empleados & Flota
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('gastos')" id="btn-nav-gastos" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          💸 Gastos Fijos
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('auditoria')" id="btn-nav-auditoria" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          🛡️ Auditoría
+        </button>
+        <button type="button" onclick="window.cambiarSeccion('ajustes')" id="btn-nav-ajustes" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
+          ⚙️ Ajustes & PINs
+        </button>
+      </nav>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar">
+
+      <!-- PESTAÑA 1: P&G -->
+      <section id="vista-pyg" class="space-y-6">
+        <div class="bg-white p-4 lg:p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="text-xs font-black uppercase text-slate-500">Periodo Contable:</span>
+            <input type="date" id="filtro-fecha-desde" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none">
+            <span class="text-xs text-slate-400 font-bold">hasta</span>
+            <input type="date" id="filtro-fecha-hasta" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 outline-none">
+            <button type="button" onclick="window.calcularEstadoResultados()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-all">
+              Actualizar P&G
+            </button>
+          </div>
+          <button type="button" onclick="window.exportarInformeExcel()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2">
+            <span>📥</span> <span>Descargar Informe Consolidado</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-slate-400">Ingresos Totales (Ventas Netas)</span>
+            <p class="text-2xl lg:text-3xl font-black text-slate-900" id="kpi-ventas-totales">$0</p>
+            <span class="text-[11px] text-emerald-600 font-bold" id="kpi-conteo-facturas">0 facturas emitidas</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-slate-400">Costo Mercancía Vendida (CMV)</span>
+            <p class="text-2xl lg:text-3xl font-black text-rose-700" id="kpi-cmv-total">$0</p>
+            <span class="text-[11px] text-slate-500 font-semibold" id="kpi-margen-bruto-pct">Margen Bruto: 0%</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-1">
+            <span class="text-[10px] font-black uppercase text-slate-400">Gastos Operativos (Fijos/Variables)</span>
+            <p class="text-2xl lg:text-3xl font-black text-amber-700" id="kpi-gastos-totales">$0</p>
+            <span class="text-[11px] text-slate-500 font-semibold">Nómina, combustible y fletes</span>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border-2 border-indigo-200 shadow-md space-y-1 bg-indigo-50/30">
+            <span class="text-[10px] font-black uppercase text-indigo-900">Utilidad Neta Operativa</span>
+            <p class="text-2xl lg:text-3xl font-black text-indigo-950" id="kpi-utilidad-neta">$0</p>
+            <span class="text-[11px] font-black" id="kpi-rentabilidad-neta-pct">Rentabilidad: 0%</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="font-black text-base text-slate-900 border-b pb-2">Estado de Resultados Consolidado</h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-1.5 border-b font-bold text-slate-700">
+                <span>(+) Ventas Totales Netas (Rutas y Mostrador)</span>
+                <span id="pyg-ventas-netas" class="text-slate-900 font-black">$0</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b font-bold text-rose-600">
+                <span>(-) Costo de Mercancía Vendida (Costo compra)</span>
+                <span id="pyg-cmv">-$0</span>
+              </div>
+              <div class="flex justify-between py-2 border-b bg-emerald-50 px-3 rounded-lg font-black text-emerald-900 text-sm">
+                <span>(=) UTILIDAD BRUTA</span>
+                <span id="pyg-utilidad-bruta">$0</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b font-bold text-amber-700">
+                <span>(-) Gastos de Operación y Logística</span>
+                <span id="pyg-gastos-operacion">-$0</span>
+              </div>
+              <div class="flex justify-between py-1.5 border-b font-bold text-amber-700">
+                <span>(-) Comisiones Pagadas a Repartidores y Preventa</span>
+                <span id="pyg-comisiones">-$0</span>
+              </div>
+              <div class="flex justify-between py-3 border-t-2 border-indigo-950 bg-indigo-950 text-white px-4 rounded-xl font-black text-base">
+                <span>(=) UTILIDAD NETA REAL</span>
+                <span id="pyg-utilidad-final" class="text-emerald-400">$0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+            <div>
+              <span class="text-[10px] font-black uppercase text-indigo-600 tracking-wider">Viabilidad Financiera</span>
+              <h3 class="font-black text-base text-slate-900 mt-1">Punto de Equilibrio</h3>
+              <p class="text-xs text-slate-500 mt-1">Venta mensual mínima requerida para cubrir gastos fijos.</p>
+              
+              <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mt-4 space-y-2">
+                <span class="text-[10px] font-bold text-slate-400 uppercase block">Meta Mínima Mensual:</span>
+                <p class="text-2xl font-black text-slate-900" id="pto-equilibrio-valor">$0</p>
+                <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mt-2">
+                  <div id="barra-progreso-equilibrio" class="bg-indigo-600 h-full w-0 transition-all"></div>
+                </div>
+                <span class="text-[11px] font-bold text-slate-600 block mt-1" id="pto-equilibrio-texto">Progreso: 0%</span>
+              </div>
+            </div>
+
+            <div class="border-t pt-3 text-xs text-slate-500 space-y-1">
+              <p>• Costos Fijos Totales: <b id="pe-gastos-fijos" class="text-slate-800">$0</b></p>
+              <p>• Margen de Contribución Promedio: <b id="pe-margen-pct" class="text-slate-800">18.5%</b></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. PESTAÑA: INVENTARIOS & PRECIOS -->
+      <section id="vista-inventario" class="space-y-6" style="display: none;">
+        
+        <!-- SUB-NAVEGACIÓN -->
+        <div class="flex flex-wrap items-center justify-between border-b border-slate-200 pb-3 gap-3">
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="window.cambiarSubpestanaInv('catalogo')" id="subnav-inv-catalogo" class="px-4 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-sm">
+              🏷️ Catálogo & Precios
+            </button>
+            <button type="button" onclick="window.cambiarSubpestanaInv('inicial')" id="subnav-inv-inicial" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200">
+              📊 Inventario Inicial Histórico
+            </button>
+            <button type="button" onclick="window.cambiarSubpestanaInv('factura_compra')" id="subnav-inv-factura_compra" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200">
+              📥 Ingreso por Facturas de Compra (Multi-Ítems)
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="file" id="input-archivo-excel" accept=".xlsx, .xls, .csv" onchange="window.cargarExcelMasivo(event)" class="hidden">
+            <button type="button" onclick="document.getElementById('input-archivo-excel').click()" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2">
+              <span>📊</span> <span>Subir Catálogo e Inventario Inicial (Excel/CSV)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SUBVISTA A: CATÁLOGO Y PRECIOS -->
+        <div id="subvista-inv-catalogo" class="space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-black text-base text-slate-900">Listas de Precios Oficiales</h3>
+              <p class="text-xs text-slate-500">Costo compra, Mostrador, Mayorista, Pronto Pago y Unidad suelta.</p>
+            </div>
+            <button type="button" onclick="window.abrirModalProducto()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md flex items-center gap-2">
+              <span>+</span> <span>Crear Producto Manual</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                  <tr>
+                    <th class="p-3.5">SKU</th>
+                    <th class="p-3.5">Producto</th>
+                    <th class="p-3.5 text-center">Empaque</th>
+                    <th class="p-3.5 text-right">Costo Compra</th>
+                    <th class="p-3.5 text-right">Precio Mostrador</th>
+                    <th class="p-3.5 text-right">Precio Mayorista</th>
+                    <th class="p-3.5 text-right text-emerald-700">Pronto Pago</th>
+                    <th class="p-3.5 text-right">Unidad Suelta</th>
+                    <th class="p-3.5 text-center">Stock Actual</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-admin-productos-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <!-- Inyectado por JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBVISTA B: INVENTARIO INICIAL HISTÓRICO -->
+        <div id="subvista-inv-inicial" class="space-y-4" style="display: none;">
+          <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex justify-between items-center">
+            <div>
+              <h3 class="font-black text-sm text-amber-950">Línea Base: Inventario Inicial del Negocio</h3>
+              <p class="text-xs text-amber-800">Punto de partida histórico. No se altera con facturas posteriores.</p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] font-black uppercase text-amber-700 block">Total Valorizado Inicial:</span>
+              <span class="font-black text-amber-950 text-lg" id="inv-inicial-gran-total">$0</span>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                  <tr>
+                    <th class="p-3.5">SKU</th>
+                    <th class="p-3.5">Producto</th>
+                    <th class="p-3.5 text-center">Factor Empaque</th>
+                    <th class="p-3.5 text-right">Pacas Iniciales</th>
+                    <th class="p-3.5 text-right">Unidades Totales</th>
+                    <th class="p-3.5 text-right">Costo Paca</th>
+                    <th class="p-3.5 text-right">Valor Total Inicial</th>
+                    <th class="p-3.5 text-center">Fecha Cargue</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-inv-inicial-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                  <!-- Inyectado por JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBVISTA C: INGRESO POR FACTURAS DE COMPRA (MULTI-PRODUCTO SIMULTÁNEO) -->
+        <div id="subvista-inv-factura_compra" class="space-y-4" style="display: none;">
+          <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            <div>
+              <h3 class="font-black text-base text-slate-900">Ingreso por Factura de Proveedor (Recepción Multi-Producto)</h3>
+              <p class="text-xs text-slate-500">Agrega todos los productos de la factura física a la vez y súbelos simultáneamente al inventario central.</p>
+            </div>
+
+            <form onsubmit="window.procesarFacturaCompraMasiva(event)" class="space-y-5 text-xs">
+              
+              <!-- DATOS DE CABECERA DE LA FACTURA -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div>
+                  <label class="block font-black text-slate-600 uppercase mb-1">Proveedor Oficial *</label>
+                  <input type="text" id="fc-proveedor" required value="FEMSA - COCA COLA" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold outline-none">
+                </div>
+                <div>
+                  <label class="block font-black text-slate-600 uppercase mb-1">Número Factura / Remisión *</label>
+                  <input type="text" id="fc-numero" required placeholder="Ej: FEM-98234" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold outline-none">
+                </div>
+                <div>
+                  <label class="block font-black text-slate-600 uppercase mb-1">Fecha Factura *</label>
+                  <input type="date" id="fc-fecha" required class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold outline-none">
+                </div>
+              </div>
+
+              <!-- TABLA DINÁMICA DE PRODUCTOS DE LA FACTURA -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="font-black text-xs uppercase text-slate-700 tracking-wider">Productos Incluidos en la Factura</span>
+                  <button type="button" onclick="window.agregarFilaFacturaCompra()" class="px-3.5 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 font-black rounded-xl flex items-center gap-1.5 shadow-sm">
+                    <span>+</span> <span>Agregar Otro Producto</span>
+                  </button>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
+                  <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100 border-b text-slate-500 uppercase font-black">
+                      <tr>
+                        <th class="p-3">Producto / Presentación</th>
+                        <th class="p-3 text-center w-32">Pacas Recibidas</th>
+                        <th class="p-3 text-right w-40">Costo Compra Paca ($)</th>
+                        <th class="p-3 text-right w-40">Subtotal Renglón</th>
+                        <th class="p-3 text-center w-16">Quitar</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tabla-filas-factura-body" class="divide-y divide-slate-200 bg-white">
+                      <!-- Inyectado dinámicamente -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- CONSOLIDADO TOTAL DE LA FACTURA -->
+              <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-200 flex flex-wrap justify-between items-center gap-4">
+                <div class="flex gap-6">
+                  <div>
+                    <span class="text-[10px] font-black uppercase text-indigo-900 block">Total Referencias:</span>
+                    <span class="font-black text-slate-800 text-base" id="fc-resumen-items">0 productos</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-black uppercase text-indigo-900 block">Total Pacas Físicas:</span>
+                    <span class="font-black text-slate-800 text-base" id="fc-resumen-pacas">0 pacas</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] font-black uppercase text-indigo-900 block">Valor Total Factura:</span>
+                  <span class="text-2xl font-black text-indigo-950" id="fc-resumen-gran-total">$0</span>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-lg shadow-emerald-600/30 text-sm transition-all flex items-center justify-center gap-2">
+                <span>📥</span> <span>Ingresar Todos los Productos a Bodega Central de una Vez</span>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 3. PESTAÑA: CLIENTES Y CRÉDITO CÍCLICO -->
+      <section id="vista-clientes" class="space-y-6" style="display: none;">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Gestión de Clientes y Créditos Cíclicos</h2>
+            <p class="text-xs text-slate-500">Al pagar y quedar al día, las fechas de vigencia del crédito se renuevan automáticamente.</p>
+          </div>
+          <button type="button" onclick="window.abrirModalNuevoCliente()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md">
+            + Crear Cliente Nuevo
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">Tienda</th>
+                  <th class="p-3.5">Propietario / Tel</th>
+                  <th class="p-3.5 text-center">Modalidad</th>
+                  <th class="p-3.5 text-right">Cupo Asignado</th>
+                  <th class="p-3.5 text-center">Inicio Crédito</th>
+                  <th class="p-3.5 text-center">Vencimiento (Fin)</th>
+                  <th class="p-3.5 text-center">Estado Cíclico</th>
+                  <th class="p-3.5 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-admin-clientes-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. PESTAÑA: EMPLEADOS, FLOTA Y RENDIMIENTO -->
+      <section id="vista-equipo" class="space-y-6" style="display: none;">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Personal Operativo, Vehículos y Métricas</h2>
+            <p class="text-xs text-slate-500">Histórico de ventas semanal/mensual, PINs de acceso para repartidores y odómetro.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-black text-sm text-slate-900 uppercase">Fichas de Empleados y Rendimiento</h3>
+            <div id="lista-empleados-admin" class="space-y-3 text-xs">
+              <!-- Inyectado por JS -->
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-black text-sm text-slate-900 uppercase">Control de Flota y Kilometraje</h3>
+            <div id="lista-vehiculos-admin" class="space-y-3 text-xs">
+              <!-- Inyectado por JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PESTAÑA: GASTOS OPERATIVOS -->
+      <section id="vista-gastos" class="space-y-6" style="display: none;">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Gastos y Egresos Operativos</h2>
+            <p class="text-xs text-slate-500">Asienta combustibles, fletes y arriendos para afectar el P&G.</p>
+          </div>
+          <button type="button" onclick="window.abrirModalGasto()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs rounded-xl shadow-md">
+            + Registrar Gasto
+          </button>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">Fecha</th>
+                  <th class="p-3.5">Categoría</th>
+                  <th class="p-3.5">Descripción</th>
+                  <th class="p-3.5 text-right">Monto</th>
+                  <th class="p-3.5 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-gastos-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. PESTAÑA: AUDITORÍA -->
+      <section id="vista-auditoria" class="space-y-6" style="display: none;">
+        <div>
+          <h2 class="text-lg lg:text-xl font-black text-slate-900">Auditoría Central y Anulación de Documentos</h2>
+          <p class="text-xs text-slate-500">Solo el Administrador puede anular facturas y remisiones tras el cierre de caja.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">Documento</th>
+                  <th class="p-3.5">Tipo</th>
+                  <th class="p-3.5">Cliente</th>
+                  <th class="p-3.5 text-right">Total</th>
+                  <th class="p-3.5 text-center">Estado</th>
+                  <th class="p-3.5 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-auditoria-facturas-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. PESTAÑA: AJUSTES & PINS -->
+      <section id="vista-ajustes" class="space-y-6" style="display: none;">
+        <div>
+          <h2 class="text-lg lg:text-xl font-black text-slate-900">Ajustes Generales y Credenciales del Ecosistema</h2>
+          <p class="text-xs text-slate-500">Configura los PINs de administración, credenciales del POS y contraseñas de Bodega y Preventa.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
+            <h3 class="font-black text-sm text-slate-900 uppercase">PINs Administradores</h3>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">PIN Miguel (Actual: <span id="lbl-pin-miguel">0000</span>)</label>
+              <input type="text" id="set-pin-miguel" maxlength="4" placeholder="0000" class="w-full p-2 bg-slate-50 border rounded-xl font-black">
+            </div>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">PIN Diego (Actual: <span id="lbl-pin-diego">1234</span>)</label>
+              <input type="text" id="set-pin-diego" maxlength="4" placeholder="1234" class="w-full p-2 bg-slate-50 border rounded-xl font-black">
+            </div>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">PIN Rodrigo (Actual: <span id="lbl-pin-rodrigo">1730</span>)</label>
+              <input type="text" id="set-pin-rodrigo" maxlength="4" placeholder="1730" class="w-full p-2 bg-slate-50 border rounded-xl font-black">
+            </div>
+            <button type="button" onclick="window.guardarPinsAdmin()" class="w-full py-2.5 bg-indigo-600 text-white font-black rounded-xl">
+              Guardar PINs Admin
+            </button>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
+            <h3 class="font-black text-sm text-slate-900 uppercase">Credenciales POS Mostrador</h3>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">Usuario POS</label>
+              <input type="text" id="set-pos-user" value="admin" class="w-full p-2 bg-slate-50 border rounded-xl font-bold">
+            </div>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">Contraseña POS</label>
+              <input type="text" id="set-pos-pass" value="comparto123" class="w-full p-2 bg-slate-50 border rounded-xl font-bold">
+            </div>
+            <button type="button" onclick="window.guardarCredencialesPOS()" class="w-full py-2.5 bg-slate-800 text-white font-black rounded-xl">
+              Actualizar Clave POS
+            </button>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3 text-xs">
+            <h3 class="font-black text-sm text-slate-900 uppercase">PINs Bodega & Preventa</h3>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">PIN Bodega Central</label>
+              <input type="text" id="set-pin-bodega" value="9999" maxlength="4" class="w-full p-2 bg-slate-50 border rounded-xl font-black text-emerald-700">
+            </div>
+            <div>
+              <label class="block text-slate-500 font-bold mb-1">PINs Preventa (3 Usuarios)</label>
+              <input type="text" id="set-pin-prev" value="0000, 1234, 1111" class="w-full p-2 bg-slate-50 border rounded-xl font-bold">
+            </div>
+            <button type="button" onclick="window.guardarPinsModulos()" class="w-full py-2.5 bg-emerald-600 text-white font-black rounded-xl">
+              Guardar Accesos
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-6 text-center text-xs font-bold text-slate-600 flex justify-between items-center">
+      <span>Distribuidora Comparto © 2026 - Grupo MAF</span>
+      <span class="text-indigo-900 font-black">Creado y desarrollado por: Jr Naranjo - 322 858 6808</span>
+    </footer>
+
+  </div>
+
+  <!-- SCRIPT DEFINITIVO DE CONTROL -->
+  <script>
+    var pinsAdmin = { 'Miguel': '0000', 'Diego': '1234', 'Rodrigo': '1730' };
+    var adminSeleccionado = 'Rodrigo';
+
+    window.seleccionarAdmin = function(nombre) {
+      adminSeleccionado = nombre;
+      ['Miguel', 'Diego', 'Rodrigo'].forEach(function(u) {
+        var btn = document.getElementById('btn-user-' + u.toLowerCase());
+        btn.className = (u === nombre)
+          ? "p-3 rounded-2xl border border-indigo-600 bg-indigo-600/30 text-white font-black text-xs"
+          : "p-3 rounded-2xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs";
+      });
+      document.getElementById('input-pin-admin').value = '';
+    };
+
+    window.teclearPin = function(digito) {
+      var inp = document.getElementById('input-pin-admin');
+      if (inp.value.length < 4) inp.value += digito;
+      if (inp.value.length === 4) window.validarAccesoAdmin();
+    };
+
+    window.borrarPin = function() {
+      var inp = document.getElementById('input-pin-admin');
+      inp.value = inp.value.slice(0, -1);
+    };
+
+    window.validarAccesoAdmin = function() {
+      var pin = document.getElementById('input-pin-admin').value;
+      if (pin === pinsAdmin[adminSeleccionado]) {
+        document.getElementById('pantalla-login-admin').style.display = 'none';
+        document.getElementById('badge-admin-activo').innerText = `SESIÓN: ${adminSeleccionado.toUpperCase()}`;
+      } else {
+        alert("PIN incorrecto.");
+        document.getElementById('input-pin-admin').value = '';
+      }
+    };
+
+    var productosAdmin = [];
+    var inventarioInicialHistorico = [];
+    var filasFacturaCompra = []; // [{ id, productoId, pacas, costo }]
+    
+    var gastosOperativos = [
+      { id: 'gst-1', fecha: '2026-09-15', categoria: 'Combustible', desc: 'Tanqueada NHR ABC123', monto: 180000 },
+      { id: 'gst-2', fecha: '2026-09-14', categoria: 'Fletes', desc: 'Flete fluvial remesa Inírida', monto: 450000 },
+      { id: 'gst-3', fecha: '2026-09-12', categoria: 'Arriendo', desc: 'Cuota mensual bodega', monto: 1200000 }
+    ];
+
+    var clientesAdmin = [
+      { id: 'cli-1', tienda: 'Tienda Don José', prop: 'José Pérez', tel: '3101234567', modalidad: 'credito', cupo: 2500000, inicio_credito: '2026-09-01', fin_credito: '2026-09-16', estado: 'al_dia' },
+      { id: 'cli-2', tienda: 'Superete La Cabaña', prop: 'Carlos Gómez', tel: '3129876543', modalidad: 'credito', cupo: 4000000, inicio_credito: '2026-09-05', fin_credito: '2026-09-20', estado: 'al_dia' }
+    ];
+
+    var empleadosAdmin = [
+      { id: 'emp-1', nombre: 'Luis Martínez', rol: 'Repartidor', vehiculo: 'Camión NHR (ABC123)', pin: '1140', comision: 3.0, venta_semana: 3450000, venta_mes: 14200000, meta: 15000000 },
+      { id: 'emp-2', nombre: 'Carlos Méndez', rol: 'Preventista', vehiculo: 'Zona Centro (Moto)', pin: '2210', comision: 2.5, venta_semana: 2800000, venta_mes: 11500000, meta: 12000000 }
+    ];
+
+    var vehiculosAdmin = [
+      { id: 'veh-1', placa: 'ABC123', tipo: 'Camión NHR', capacidad: 120, km_inicial: 11400, km_actual: 11470 }
+    ];
+
+    var facturasAuditoria = [
+      { id: 'FAC-0001', codigo: 'FAC-0001', tipo: 'Mostrador', cliente: 'Cliente Mostrador', total: 154000, cmv: 130000, estado: 'emitida' },
+      { id: 'RM-ABC123-0001', codigo: 'RM-ABC123-0001', tipo: 'Ruta Móvil', cliente: 'Tienda Don José', total: 345000, cmv: 290000, estado: 'emitida' },
+      { id: 'RM-ABC123-0002', codigo: 'RM-ABC123-0002', tipo: 'Ruta Móvil', cliente: 'Superete La Cabaña', total: 580000, cmv: 490000, estado: 'emitida' }
+    ];
+
+    window.cambiarSeccion = function(seccionId) {
+      ['pyg', 'inventario', 'clientes', 'equipo', 'gastos', 'auditoria', 'ajustes'].forEach(function(s) {
+        var sec = document.getElementById('vista-' + s);
+        var btn = document.getElementById('btn-nav-' + s);
+        if (sec) sec.style.display = (s === seccionId) ? 'block' : 'none';
+        if (btn) {
+          btn.className = (s === seccionId)
+            ? "px-3.5 py-2 rounded-xl font-black bg-indigo-600 text-white shadow-md transition-all"
+            : "px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all";
+        }
+      });
+
+      if (seccionId === 'pyg') window.calcularEstadoResultados();
+      if (seccionId === 'inventario') window.renderizarProductosAdmin();
+      if (seccionId === 'clientes') window.renderizarClientesAdmin();
+      if (seccionId === 'equipo') window.renderizarEquipoAdmin();
+      if (seccionId === 'gastos') window.renderizarGastosAdmin();
+      if (seccionId === 'auditoria') window.renderizarAuditoriaFacturas();
+    };
+
+    window.cambiarSubpestanaInv = function(subId) {
+      ['catalogo', 'inicial', 'factura_compra'].forEach(function(sb) {
+        var v = document.getElementById('subvista-inv-' + sb);
+        var b = document.getElementById('subnav-inv-' + sb);
+        if (v) v.style.display = (sb === subId) ? 'block' : 'none';
+        if (b) {
+          b.className = (sb === subId)
+            ? "px-4 py-2 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-sm"
+            : "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200";
+        }
+      });
+
+      if (subId === 'inicial') window.renderizarInvInicial();
+      if (subId === 'factura_compra') window.iniciarFormularioFacturaCompra();
+    };
+
+    // CARGA MASIVA DE EXCEL / CSV PARA ESTABLECER INVENTARIO INICIAL
+    window.cargarExcelMasivo = function(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: 'array' });
+          var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          var jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+          if (!jsonData || jsonData.length === 0) {
+            alert("El archivo Excel/CSV está vacío.");
+            return;
+          }
+
+          var fechaHoy = new Date().toISOString().split('T')[0];
+          productosAdmin = [];
+          inventarioInicialHistorico = [];
+
+          jsonData.forEach(function(row, idx) {
+            var sku = row.sku || row.SKU || ('KO-' + String(idx + 1).padStart(3, '0'));
+            var nombre = row.nombre_producto || row.nombre || row.Producto || 'Producto ' + (idx + 1);
+            var factor = parseInt(row.unidades_por_paca || row.factor_empaque || row.factor || 12);
+            var costo = parseFloat(row.precio_compra_paca || row.costo || 0);
+            var ventaPaca = parseFloat(row.precio_venta_paca || row.mayorista || 0);
+            var ventaUnidad = parseFloat(row.precio_venta_unidad || row.unidad || 0);
+            var stockPacas = parseInt(row.stock_bodega_principal || row.stock_inicial || row.pacas || 0);
+
+            productosAdmin.push({
+              id: sku,
+              sku: sku,
+              nombre: nombre,
+              factor: factor,
+              costo: costo,
+              mostrador: Math.round(ventaPaca * 1.05),
+              mayorista: ventaPaca,
+              pronto: Math.round(ventaPaca * 0.96),
+              unidad: ventaUnidad,
+              stock: stockPacas
+            });
+
+            inventarioInicialHistorico.push({
+              sku: sku,
+              nombre: nombre,
+              factor: factor,
+              pacas_iniciales: stockPacas,
+              unidades_totales: stockPacas * factor,
+              costo_paca: costo,
+              valor_total: stockPacas * costo,
+              fecha: fechaHoy
+            });
+          });
+
+          alert(`¡Catálogo e Inventario Inicial Cargados!\nSe procesaron ${productosAdmin.length} productos. La línea base histórica quedó congelada.`);
+          window.renderizarProductosAdmin();
+          window.renderizarInvInicial();
+          window.cambiarSubpestanaInv('inicial');
+        } catch (err) {
+          console.error(err);
+          alert("Error al leer el archivo Excel.");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    };
+
+    window.renderizarInvInicial = function() {
+      var tbody = document.getElementById('tabla-inv-inicial-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      var granTotal = 0;
+      inventarioInicialHistorico.forEach(function(item) {
+        granTotal += item.valor_total;
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono text-slate-500 font-bold">${item.sku}</td>
+          <td class="p-3.5 font-extrabold text-slate-900">${item.nombre}</td>
+          <td class="p-3.5 text-center font-bold">x ${item.factor}</td>
+          <td class="p-3.5 text-right font-black text-slate-900 text-sm">${item.pacas_iniciales.toLocaleString()} pacas</td>
+          <td class="p-3.5 text-right font-semibold text-slate-600">${item.unidades_totales.toLocaleString()} uds</td>
+          <td class="p-3.5 text-right font-bold text-rose-700">$${item.costo_paca.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-indigo-950 text-sm">$${item.valor_total.toLocaleString()}</td>
+          <td class="p-3.5 text-center text-slate-400 font-bold">${item.fecha}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('inv-inicial-gran-total').innerText = `$${granTotal.toLocaleString()}`;
+    };
+
+    window.renderizarProductosAdmin = function() {
+      var tbody = document.getElementById('tabla-admin-productos-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      productosAdmin.forEach(function(p) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono text-slate-500 font-bold">${p.sku}</td>
+          <td class="p-3.5 font-extrabold text-slate-900">${p.nombre}</td>
+          <td class="p-3.5 text-center font-bold">x ${p.factor}</td>
+          <td class="p-3.5 text-right font-black text-rose-700">$${p.costo.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${p.mostrador.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-indigo-900">$${p.mayorista.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-emerald-700">$${p.pronto.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-slate-700">$${p.unidad.toLocaleString()}</td>
+          <td class="p-3.5 text-center font-black text-indigo-950">${p.stock} pacas</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // INGRESO MULTI-PRODUCTO POR FACTURA DE COMPRA SIMULTÁNEO
+    window.iniciarFormularioFacturaCompra = function() {
+      document.getElementById('fc-fecha').valueAsDate = new Date();
+      if (filasFacturaCompra.length === 0) {
+        window.agregarFilaFacturaCompra();
+      }
+    };
+
+    window.agregarFilaFacturaCompra = function() {
+      var filaId = 'fila-fc-' + Date.now() + Math.random().toString().slice(2, 5);
+      filasFacturaCompra.push({ id: filaId, productoId: (productosAdmin[0] ? productosAdmin[0].id : ''), pacas: 1, costo: (productosAdmin[0] ? productosAdmin[0].costo : 0) });
+      window.renderizarFilasFacturaCompra();
+    };
+
+    window.eliminarFilaFacturaCompra = function(filaId) {
+      if (filasFacturaCompra.length <= 1) {
+        alert("La factura debe tener al menos un producto.");
+        return;
+      }
+      filasFacturaCompra = filasFacturaCompra.filter(f => f.id !== filaId);
+      window.renderizarFilasFacturaCompra();
+    };
+
+    window.renderizarFilasFacturaCompra = function() {
+      var tbody = document.getElementById('tabla-filas-factura-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      var totalPacas = 0;
+      var totalFactura = 0;
+
+      filasFacturaCompra.forEach(function(fila, idx) {
+        var sub = fila.pacas * fila.costo;
+        totalPacas += fila.pacas;
+        totalFactura += sub;
+
+        var optProductos = productosAdmin.map(p => `
+          <option value="${p.id}" ${p.id === fila.productoId ? 'selected' : ''}>${p.nombre}</option>
+        `).join('');
+
+        var tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-3">
+            <select onchange="window.actualizarProductoFila('${fila.id}', this.value)" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 outline-none">
+              ${optProductos}
+            </select>
+          </td>
+          <td class="p-3 text-center">
+            <input type="number" min="1" value="${fila.pacas}" oninput="window.actualizarPacasFila('${fila.id}', this.value)" class="w-24 p-2 bg-slate-50 border border-slate-300 rounded-xl text-center font-black text-slate-900 outline-none">
+          </td>
+          <td class="p-3 text-right">
+            <input type="number" min="0" value="${fila.costo}" oninput="window.actualizarCostoFila('${fila.id}', this.value)" class="w-32 p-2 bg-slate-50 border border-slate-300 rounded-xl text-right font-black text-rose-700 outline-none">
+          </td>
+          <td class="p-3 text-right font-black text-slate-900 text-sm">
+            $${sub.toLocaleString()}
+          </td>
+          <td class="p-3 text-center">
+            <button type="button" onclick="window.eliminarFilaFacturaCompra('${fila.id}')" class="text-rose-500 hover:text-rose-700 font-black p-1 text-sm">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('fc-resumen-items').innerText = `${filasFacturaCompra.length} referencias`;
+      document.getElementById('fc-resumen-pacas').innerText = `${totalPacas} pacas`;
+      document.getElementById('fc-resumen-gran-total').innerText = `$${totalFactura.toLocaleString()}`;
+    };
+
+    window.actualizarProductoFila = function(filaId, prodId) {
+      var fila = filasFacturaCompra.find(f => f.id === filaId);
+      var prod = productosAdmin.find(p => p.id === prodId);
+      if (fila && prod) {
+        fila.productoId = prodId;
+        fila.costo = prod.costo;
+        window.renderizarFilasFacturaCompra();
+      }
+    };
+
+    window.actualizarPacasFila = function(filaId, val) {
+      var fila = filasFacturaCompra.find(f => f.id === filaId);
+      if (fila) {
+        fila.pacas = parseInt(val) || 0;
+        window.renderizarFilasFacturaCompra();
+      }
+    };
+
+    window.actualizarCostoFila = function(filaId, val) {
+      var fila = filasFacturaCompra.find(f => f.id === filaId);
+      if (fila) {
+        fila.costo = parseFloat(val) || 0;
+        window.renderizarFilasFacturaCompra();
+      }
+    };
+
+    window.procesarFacturaCompraMasiva = function(e) {
+      e.preventDefault();
+      var numFactura = document.getElementById('fc-numero').value;
+      var proveedor = document.getElementById('fc-proveedor').value;
+
+      if (filasFacturaCompra.length === 0) {
+        alert("Agrega al menos un producto a la factura.");
+        return;
+      }
+
+      var totalPacas = 0;
+      var totalFactura = 0;
+
+      // PROCESAMIENTO SIMULTÁNEO DE TODOS LOS PRODUCTOS
+      filasFacturaCompra.forEach(function(fila) {
+        var prod = productosAdmin.find(p => p.id === fila.productoId);
+        if (prod) {
+          prod.stock += fila.pacas; // Suma stock a la Bodega Central
+          prod.costo = fila.costo;  // Actualiza costo ponderado
+          totalPacas += fila.pacas;
+          totalFactura += (fila.pacas * fila.costo);
+        }
+      });
+
+      alert(`¡Factura ${numFactura} de ${proveedor} procesada con éxito!\n- ${filasFacturaCompra.length} referencias cargadas simultáneamente.\n- ${totalPacas} pacas totales sumadas a Bodega Central.\n- Monto total: $${totalFactura.toLocaleString()}.`);
+
+      // Limpiar formulario
+      document.getElementById('fc-numero').value = '';
+      filasFacturaCompra = [];
+      window.iniciarFormularioFacturaCompra();
+      window.renderizarProductosAdmin();
+      window.cambiarSubpestanaInv('catalogo');
+    };
+
+    // CLIENTES Y CRÉDITO CÍCLICO
+    window.renderizarClientesAdmin = function() {
+      var tbody = document.getElementById('tabla-admin-clientes-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      clientesAdmin.forEach(function(c, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-extrabold text-slate-900">${c.tienda}</td>
+          <td class="p-3.5 font-medium">${c.prop} • ${c.tel}</td>
+          <td class="p-3.5 text-center uppercase font-black text-[10px] text-indigo-700">${c.modalidad}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${c.cupo.toLocaleString()}</td>
+          <td class="p-3.5 text-center font-bold">${c.inicio_credito}</td>
+          <td class="p-3.5 text-center font-bold text-rose-700">${c.fin_credito}</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${c.estado === 'al_dia' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${c.estado === 'al_dia' ? '✓ Al Día (Cíclico)' : 'Mora'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            <button type="button" onclick="window.renovarCicloCredito(${idx})" class="text-xs font-bold text-emerald-600 hover:text-emerald-800">Renovar Ciclo</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.renovarCicloCredito = function(idx) {
+      var c = clientesAdmin[idx];
+      var hoy = new Date();
+      var prox = new Date();
+      prox.setDate(hoy.getDate() + 15);
+
+      c.inicio_credito = hoy.toISOString().split('T')[0];
+      c.fin_credito = prox.toISOString().split('T')[0];
+      c.estado = 'al_dia';
+      alert(`¡Crédito renovado para ${c.tienda}!\nNuevo ciclo: ${c.inicio_credito} al ${c.fin_credito}.`);
+      window.renderizarClientesAdmin();
+    };
+
+    // EMPLEADOS, VEHÍCULOS, HISTORIAL Y PINS
+    window.renderizarEquipoAdmin = function() {
+      var contEmp = document.getElementById('lista-empleados-admin');
+      contEmp.innerHTML = '';
+      empleadosAdmin.forEach(function(e, idx) {
+        var pctMeta = Math.min(100, Math.round((e.venta_mes / e.meta) * 100));
+        contEmp.innerHTML += `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="font-black text-slate-900 text-sm block">${e.nombre}</span>
+                <span class="text-slate-500 font-bold text-[11px]">${e.rol} • ${e.vehiculo}</span>
+              </div>
+              <div class="text-right">
+                <span class="bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded font-black text-[10px] block">PIN: ${e.pin}</span>
+                <span class="text-[10px] font-bold text-emerald-700">${e.comision}% Comisión</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Venta Semana</span>
+                <span class="font-black text-slate-900">$${e.venta_semana.toLocaleString()}</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Venta Mes (Meta)</span>
+                <span class="font-black text-indigo-950">$${e.venta_mes.toLocaleString()} / $${e.meta.toLocaleString()}</span>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-[11px]">
+              <span class="text-slate-500 font-bold">Progreso Meta: <b>${pctMeta}%</b></span>
+              <button type="button" onclick="window.cambiarPinEmpleado(${idx})" class="text-indigo-600 font-bold hover:underline">Cambiar PIN</button>
+            </div>
+          </div>
+        `;
+      });
+
+      var contVeh = document.getElementById('lista-vehiculos-admin');
+      contVeh.innerHTML = '';
+      vehiculosAdmin.forEach(function(v) {
+        var recorrido = v.km_actual - v.km_inicial;
+        contVeh.innerHTML += `
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="font-black text-slate-900 text-sm block">${v.tipo} • Placa: ${v.placa}</span>
+                <span class="text-slate-500 font-bold text-[11px]">Capacidad: ${v.capacidad} pacas</span>
+              </div>
+              <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-black text-[10px] uppercase">Operativo</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center text-xs">
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block">KM Inicial</span>
+                <span class="font-black text-slate-800">${v.km_inicial} km</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 font-bold block">KM Odómetro</span>
+                <span class="font-black text-indigo-900">${v.km_actual} km</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-emerald-600 font-bold block">Recorrido</span>
+                <span class="font-black text-emerald-700">+${recorrido} km</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    };
+
+    window.cambiarPinEmpleado = function(idx) {
+      var e = empleadosAdmin[idx];
+      var nuevo = prompt(`Ingresa nuevo PIN de 4 dígitos para ${e.nombre}:`, e.pin);
+      if (nuevo && nuevo.length === 4) {
+        e.pin = nuevo;
+        window.renderizarEquipoAdmin();
+        alert(`PIN de ${e.nombre} actualizado a: ${e.pin}`);
+      }
+    };
+
+    // AJUSTES Y SEGURIDAD
+    window.guardarPinsAdmin = function() {
+      var pM = document.getElementById('set-pin-miguel').value;
+      var pD = document.getElementById('set-pin-diego').value;
+      var pR = document.getElementById('set-pin-rodrigo').value;
+      if (pM && pM.length === 4) pinsAdmin['Miguel'] = pM;
+      if (pD && pD.length === 4) pinsAdmin['Diego'] = pD;
+      if (pR && pR.length === 4) pinsAdmin['Rodrigo'] = pR;
+      alert("¡PINs de Administradores actualizados!");
+    };
+
+    window.guardarCredencialesPOS = function() {
+      var u = document.getElementById('set-pos-user').value;
+      var p = document.getElementById('set-pos-pass').value;
+      alert(`Credenciales POS actualizadas: ${u} / ${p}`);
+    };
+
+    window.guardarPinsModulos = function() {
+      var pb = document.getElementById('set-pin-bodega').value;
+      var pp = document.getElementById('set-pin-prev').value;
+      alert(`PINs guardados:\n- Bodega: ${pb}\n- Preventa: ${pp}`);
+    };
+
+    // GASTOS Y AUDITORÍA
+    window.renderizarGastosAdmin = function() {
+      var tbody = document.getElementById('tabla-gastos-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      gastosOperativos.forEach(function(g, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold">${g.fecha}</td>
+          <td class="p-3.5 uppercase font-bold text-[10px] text-amber-800">${g.categoria}</td>
+          <td class="p-3.5">${g.desc}</td>
+          <td class="p-3.5 text-right font-black text-rose-700">$${g.monto.toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <button type="button" onclick="gastosOperativos.splice(${idx}, 1); window.renderizarGastosAdmin(); window.calcularEstadoResultados();" class="text-rose-500 font-bold">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.renderizarAuditoriaFacturas = function() {
+      var tbody = document.getElementById('tabla-auditoria-facturas-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      facturasAuditoria.forEach(function(f, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono font-bold text-slate-900">${f.codigo}</td>
+          <td class="p-3.5">${f.tipo}</td>
+          <td class="p-3.5 font-bold">${f.cliente}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${f.total.toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${f.estado === 'anulada' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${f.estado === 'anulada' ? 'Anulada' : 'Vigente'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            ${f.estado === 'anulada' ? '<span class="text-slate-400 italic">Sin acciones</span>' : `<button type="button" onclick="facturasAuditoria[${idx}].estado='anulada'; window.renderizarAuditoriaFacturas(); window.calcularEstadoResultados();" class="px-3 py-1 bg-rose-600 text-white font-bold rounded-lg text-xs">Anular Documento</button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.exportarInformeExcel = function() {
+      var csv = "Codigo,Tipo,Cliente,Total,CMV,Estado\n";
+      facturasAuditoria.forEach(f => {
+        csv += `${f.codigo},"${f.tipo}","${f.cliente}",${f.total},${f.cmv},${f.estado}\n`;
+      });
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `P&G_Consolidado_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    };
+
+    // ARRANQUE
+    window.addEventListener('DOMContentLoaded', function() {
+      var hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('filtro-fecha-desde').value = '2026-09-01';
+      document.getElementById('filtro-fecha-hasta').value = hoy;
+
+      productosAdmin = [
+        { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, costo: 65000, mostrador: 77000, mayorista: 75000, pronto: 73000, unidad: 7500, stock: 700 },
+        { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, costo: 59000, mostrador: 70000, mayorista: 68000, pronto: 66000, unidad: 13000, stock: 650 },
+        { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, costo: 28000, mostrador: 34000, mayorista: 33000, pronto: 32000, unidad: 3500, stock: 800 },
+        { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, costo: 32000, mostrador: 38000, mayorista: 37000, pronto: 36000, unidad: 4000, stock: 750 },
+        { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor: 24, costo: 142000, mostrador: 168000, mayorista: 165000, pronto: 162000, unidad: 8500, stock: 600 }
+      ];
+
+      inventarioInicialHistorico = productosAdmin.map(p => ({
+        sku: p.sku,
+        nombre: p.nombre,
+        factor: p.factor,
+        pacas_iniciales: p.stock,
+        unidades_totales: p.stock * p.factor,
+        costo_paca: p.costo,
+        valor_total: p.stock * p.costo,
+        fecha: '2026-09-01'
+      }));
+
+      window.calcularEstadoResultados();
+      window.renderizarProductosAdmin();
+      window.renderizarInvInicial();
+      window.renderizarClientesAdmin();
+      window.renderizarEquipoAdmin();
+      window.renderizarGastosAdmin();
+      window.renderizarAuditoriaFacturas();
+    });
+  </script>
+</body>
+</html>

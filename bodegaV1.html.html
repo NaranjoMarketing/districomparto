@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bodega Central - Distribuidora Comparto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-start lg:p-4">
+
+  <!-- PANTALLA DE ACCESO POR PIN DE BODEGA (PIN: 9999) -->
+  <div id="pantalla-login-bodega" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-6 shadow-2xl">
+      <div>
+        <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+        <h2 class="text-xl font-black text-white mt-1">ACCESO BODEGA CENTRAL</h2>
+        <p class="text-xs text-slate-400">Ingresa el PIN de seguridad del operador de bodega</p>
+      </div>
+
+      <div class="space-y-4">
+        <input type="password" id="input-pin-bodega" readonly maxlength="4" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 text-center text-3xl font-black text-emerald-400 tracking-[0.5em] outline-none">
+        
+        <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+          <button type="button" onclick="window.teclearPinBodega('1')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">1</button>
+          <button type="button" onclick="window.teclearPinBodega('2')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">2</button>
+          <button type="button" onclick="window.teclearPinBodega('3')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">3</button>
+          <button type="button" onclick="window.teclearPinBodega('4')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">4</button>
+          <button type="button" onclick="window.teclearPinBodega('5')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">5</button>
+          <button type="button" onclick="window.teclearPinBodega('6')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">6</button>
+          <button type="button" onclick="window.teclearPinBodega('7')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">7</button>
+          <button type="button" onclick="window.teclearPinBodega('8')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">8</button>
+          <button type="button" onclick="window.teclearPinBodega('9')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">9</button>
+          <button type="button" onclick="window.borrarPinBodega()" class="h-12 rounded-xl bg-rose-950/40 text-rose-400 font-bold text-sm active:scale-95">Borrar</button>
+          <button type="button" onclick="window.teclearPinBodega('0')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">0</button>
+          <button type="button" onclick="window.validarAccesoBodega()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500">PIN predeterminado: <b>9999</b></p>
+    </div>
+  </div>
+
+  <!-- PANEL DE BODEGA -->
+  <div class="w-full max-w-7xl bg-slate-100 min-h-screen lg:min-h-[880px] lg:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden pb-12">
+
+    <header class="bg-slate-950 text-white p-4 lg:px-8 lg:py-5 shadow-md sticky top-0 z-30 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+          <span class="text-[10px] bg-slate-800 text-slate-200 px-2 py-0.5 rounded font-bold">CONTROL LOGÍSTICO</span>
+          <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>BD CONECTADA</span>
+          </div>
+        </div>
+        <h1 class="font-black text-xl lg:text-2xl leading-tight">MÓDULO BODEGA CENTRAL</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Operador: Alistamiento y Despacho de Flota</p>
+      </div>
+
+      <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+        <button type="button" onclick="window.cambiarPestana('despacho')" id="tab-btn-despacho" class="px-4 py-2 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-md transition-all">
+          📦 Solicitudes de Carros
+        </button>
+        <button type="button" onclick="window.cambiarPestana('stock')" id="tab-btn-stock" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all">
+          📊 Stock Central
+        </button>
+        <button type="button" onclick="window.cambiarPestana('devoluciones')" id="tab-btn-devoluciones" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all">
+          🔄 Retornos / Cierres
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar">
+
+      <section id="vista-despacho" class="space-y-6">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Bandeja de Despacho a Vehículos</h2>
+            <p class="text-xs text-slate-500">Carga al camión con 1 solo clic y traslada el inventario sin papel[cite: 1].</p>
+          </div>
+          <button type="button" onclick="window.cargarSolicitudes()" class="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-1.5">
+            <span>🔄</span> Actualizar Bandeja
+          </button>
+        </div>
+
+        <div id="contenedor-solicitudes" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+
+      <section id="vista-stock" class="space-y-6" style="display: none;">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Inventario Bodega Principal</h2>
+            <p class="text-xs text-slate-500">Existencias físicas de Coca-Cola FEMSA[cite: 4].</p>
+          </div>
+          <div class="w-full sm:w-80 relative">
+            <input type="text" id="buscador-stock-central" oninput="window.filtrarStockCentral()" placeholder="🔍 Buscar por producto o presentación..." class="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-3 pr-8 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-600 shadow-sm">
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">SKU</th>
+                  <th class="p-3.5">Producto</th>
+                  <th class="p-3.5 text-center">Empaque</th>
+                  <th class="p-3.5 text-right">Pacas Disponibles</th>
+                  <th class="p-3.5 text-right">Unidades Totales</th>
+                  <th class="p-3.5 text-center">Estado Mínimo</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-stock-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="vista-devoluciones" class="space-y-6" style="display: none;">
+        <div class="max-w-2xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h2 class="text-lg font-black text-slate-900">Recepción de Sobrantes de Ruta</h2>
+          <p class="text-xs text-slate-500">Reingresa a la Bodega Central las pacas no vendidas[cite: 1].</p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Vehículo / Móvil</label>
+              <select id="retorno-vehiculo" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 outline-none">
+                <option value="ABC123">Camión NHR • ABC123 (Luis Martínez)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Fecha</label>
+              <input type="date" id="retorno-fecha" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none">
+            </div>
+          </div>
+
+          <div class="border-t pt-3">
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-2">Producto que Reingresa</label>
+            <div class="grid grid-cols-12 gap-2 mb-3">
+              <div class="col-span-8">
+                <select id="retorno-producto" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-semibold text-slate-800 outline-none"></select>
+              </div>
+              <div class="col-span-4">
+                <input type="number" id="retorno-pacas" min="1" placeholder="Pacas" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-black text-center outline-none">
+              </div>
+            </div>
+            <button type="button" onclick="window.agregarFilaRetorno()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold text-slate-700">
+              + Agregar al Conteo
+            </button>
+          </div>
+
+          <div id="lista-retornos-items" class="space-y-2 border-t pt-3">
+            <p class="text-xs text-slate-400 italic">No hay productos en lista de retorno.</p>
+          </div>
+
+          <button type="button" onclick="window.procesarRetornoCentral()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl shadow-lg mt-4">
+            Confirmar Reingreso a Bodega Central
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    var pinBodegaOficial = '9999';
+
+    window.teclearPinBodega = function(d) {
+      var inp = document.getElementById('input-pin-bodega');
+      if (inp.value.length < 4) inp.value += d;
+      if (inp.value.length === 4) window.validarAccesoBodega();
+    };
+
+    window.borrarPinBodega = function() {
+      var inp = document.getElementById('input-pin-bodega');
+      inp.value = inp.value.slice(0, -1);
+    };
+
+    window.validarAccesoBodega = function() {
+      var pin = document.getElementById('input-pin-bodega').value;
+      if (pin === pinBodegaOficial) {
+        document.getElementById('pantalla-login-bodega').style.display = 'none';
+      } else {
+        alert("PIN de bodega incorrecto.");
+        document.getElementById('input-pin-bodega').value = '';
+      }
+    };
+
+    var catalogo = [
+      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 700 },
+      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor_empaque: 6, stock_minimo: 50, stock_pacas: 650 },
+      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 800 },
+      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 750 },
+      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor_empaque: 24, stock_minimo: 50, stock_pacas: 600 }
+    ];
+
+    var solicitudes = [
+      {
+        id: 'sol-001',
+        consecutivo: 'SOL-ABC123-0891',
+        repartidor: 'Luis Martínez',
+        vehiculo: 'Camión NHR (ABC123)',
+        fecha: 'Mañana (06:00 AM)',
+        estado: 'pendiente',
+        items_base: [
+          { nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', pacas: 40 },
+          { nombre: 'Coca-Cola Lata 330 ml', pacas: 15 }
+        ],
+        items_extras: [
+          { cliente: 'Superete La Cabaña', producto: 'Monster Violet 473 ml', pacas: 5, nota: 'Entrega prioritaria' }
+        ],
+        total_pacas: 60
+      }
+    ];
+
+    var retornosLista = [];
+
+    window.cambiarPestana = function(pestanaId) {
+      ['despacho', 'stock', 'devoluciones'].forEach(function(p) {
+        var sec = document.getElementById('vista-' + p);
+        var btn = document.getElementById('tab-btn-' + p);
+        if (sec) sec.style.display = (p === pestanaId) ? 'block' : 'none';
+        if (btn) {
+          btn.className = (p === pestanaId)
+            ? "px-4 py-2 rounded-xl text-xs font-black bg-emerald-600 text-white shadow-md transition-all"
+            : "px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all";
+        }
+      });
+    };
+
+    window.cargarSolicitudes = function() {
+      var cont = document.getElementById('contenedor-solicitudes');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      solicitudes.forEach(function(sol) {
+        var card = document.createElement('div');
+        card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4";
+        card.innerHTML = `
+          <div class="flex justify-between items-start border-b pb-3">
+            <div>
+              <span class="text-[10px] font-black uppercase text-indigo-600 tracking-wider">${sol.fecha}</span>
+              <h3 class="font-black text-base text-slate-900">${sol.consecutivo}</h3>
+              <p class="text-xs text-slate-500 font-semibold">${sol.repartidor} • <span class="text-slate-700">${sol.vehiculo}</span></p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${sol.estado === 'cargado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${sol.estado === 'cargado' ? '✓ Cargado en Carro' : '⏳ Pendiente Alistar'}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center">
+            <div>
+              <span class="text-[10px] text-slate-400 font-black uppercase block">Base</span>
+              <span class="text-sm font-black text-slate-800">${sol.items_base.reduce((a,b) => a + b.pacas, 0)} pacas</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-amber-600 font-black uppercase block">Extras</span>
+              <span class="text-sm font-black text-amber-700">${sol.items_extras.reduce((a,b) => a + b.pacas, 0)} pacas</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-indigo-600 font-black uppercase block">Total</span>
+              <span class="text-sm font-black text-indigo-950">${sol.total_pacas} pacas</span>
+            </div>
+          </div>
+
+          <button type="button" onclick="window.cargarCarro1Clic('${sol.id}')" ${sol.estado === 'cargado' ? 'disabled' : ''} class="w-full py-3 ${sol.estado === 'cargado' ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'} font-black text-xs rounded-xl transition-all">
+            ${sol.estado === 'cargado' ? 'Stock Ya Transferido al Carro' : '⚡ 1 Clic: Cargar a Carro (Sin Papel)'}
+          </button>
+        `;
+        cont.appendChild(card);
+      });
+    };
+
+    window.cargarCarro1Clic = function(solId) {
+      var sol = solicitudes.find(s => s.id === solId);
+      if (!sol) return;
+
+      sol.items_base.forEach(b => {
+        var prod = catalogo.find(p => p.nombre.includes(b.nombre.split(' ')[0]));
+        if (prod) prod.stock_pacas -= b.pacas;
+      });
+
+      sol.items_extras.forEach(e => {
+        var prod = catalogo.find(p => p.nombre.includes(e.producto.split(' ')[0]));
+        if (prod) prod.stock_pacas -= e.pacas;
+      });
+
+      sol.estado = 'cargado';
+      alert(`¡Cargue exitoso!\n${sol.total_pacas} pacas transferidas automáticamente de Bodega Central al vehículo ${sol.vehiculo}[cite: 1].`);
+      window.cargarSolicitudes();
+      window.renderizarStockCentral(catalogo);
+    };
+
+    window.renderizarStockCentral = function(items) {
+      var tbody = document.getElementById('tabla-stock-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      items.forEach(function(item) {
+        var totalUds = item.stock_pacas * item.factor_empaque;
+        var esBajo = item.stock_pacas <= item.stock_minimo;
+
+        var tr = document.createElement('tr');
+        tr.className = esBajo ? 'bg-rose-50/70 hover:bg-rose-100/50' : 'hover:bg-slate-50/80';
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono text-slate-500 font-bold">${item.sku}</td>
+          <td class="p-3.5 font-extrabold text-slate-900">${item.nombre}</td>
+          <td class="p-3.5 text-center font-bold">x ${item.factor_empaque}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">${item.stock_pacas.toLocaleString()} pacas</td>
+          <td class="p-3.5 text-right font-semibold text-slate-600">${totalUds.toLocaleString()} uds</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${esBajo ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${esBajo ? '⚠️ Mínimo' : '✓ Normal'}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.filtrarStockCentral = function() {
+      var q = (document.getElementById('buscador-stock-central').value || '').toLowerCase().trim();
+      var filtrados = catalogo.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      window.renderizarStockCentral(filtrados);
+    };
+
+    window.agregarFilaRetorno = function() {
+      var prodSelect = document.getElementById('retorno-producto');
+      var pacasInp = document.getElementById('retorno-pacas');
+      var cant = parseInt(pacasInp.value) || 0;
+      if (cant <= 0) return alert("Ingresa pacas válidas.");
+
+      retornosLista.push({ id: prodSelect.value, nombre: prodSelect.options[prodSelect.selectedIndex].text, pacas: cant });
+      pacasInp.value = '';
+      window.renderizarListaRetornos();
+    };
+
+    window.renderizarListaRetornos = function() {
+      var cont = document.getElementById('lista-retornos-items');
+      cont.innerHTML = retornosLista.map((r, idx) => `
+        <div class="flex justify-between items-center p-2.5 bg-slate-50 border rounded-xl text-xs">
+          <span class="font-bold text-slate-700">${r.nombre}</span>
+          <span class="font-black text-indigo-900">${r.pacas} pacas</span>
+        </div>
+      `).join('') || '<p class="text-xs text-slate-400 italic">No hay productos en lista.</p>';
+    };
+
+    window.procesarRetornoCentral = function() {
+      if (retornosLista.length === 0) return alert("Agrega productos a la lista de retorno.");
+      retornosLista.forEach(r => {
+        var prod = catalogo.find(p => p.id === r.id);
+        if (prod) prod.stock_pacas += r.pacas;
+      });
+      alert("Sobrantes reingresados exitosamente a Bodega Central.");
+      retornosLista = [];
+      window.renderizarListaRetornos();
+      window.renderizarStockCentral(catalogo);
+      window.cambiarPestana('stock');
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('retorno-fecha').valueAsDate = new Date();
+      var sel = document.getElementById('retorno-producto');
+      catalogo.forEach(p => { sel.innerHTML += `<option value="${p.id}">${p.nombre}</option>`; });
+      window.cargarSolicitudes();
+      window.renderizarStockCentral(catalogo);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Repartidor - Distribuidora Comparto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-center md:p-4">
+
+  <!-- PANTALLA DE ACCESO POR PIN (BLOQUEO INICIAL) -->
+  <div id="pantalla-login-repartidor" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-6 shadow-2xl">
+      <div>
+        <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+        <h2 class="text-xl font-black text-white mt-1">ACCESO REPARTIDOR</h2>
+        <p class="text-xs text-slate-400">Ingresa tu PIN de 4 dígitos para cargar tu ruta</p>
+      </div>
+
+      <div class="space-y-4">
+        <input type="password" id="input-pin-rep" readonly maxlength="4" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 text-center text-3xl font-black text-emerald-400 tracking-[0.5em] outline-none">
+        
+        <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+          <button type="button" onclick="window.teclearPinRep('1')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">1</button>
+          <button type="button" onclick="window.teclearPinRep('2')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">2</button>
+          <button type="button" onclick="window.teclearPinRep('3')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">3</button>
+          <button type="button" onclick="window.teclearPinRep('4')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">4</button>
+          <button type="button" onclick="window.teclearPinRep('5')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">5</button>
+          <button type="button" onclick="window.teclearPinRep('6')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">6</button>
+          <button type="button" onclick="window.teclearPinRep('7')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">7</button>
+          <button type="button" onclick="window.teclearPinRep('8')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">8</button>
+          <button type="button" onclick="window.teclearPinRep('9')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">9</button>
+          <button type="button" onclick="window.borrarPinRep()" class="h-12 rounded-xl bg-rose-950/40 text-rose-400 font-bold text-sm active:scale-95">Borrar</button>
+          <button type="button" onclick="window.teclearPinRep('0')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">0</button>
+          <button type="button" onclick="window.validarAccesoRep()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500">PIN de prueba: <b>1140</b> (Luis Martínez - Camión NHR)</p>
+    </div>
+  </div>
+
+  <!-- MARCO CONTENEDOR SMARTPHONE / TABLET -->
+  <div class="w-full max-w-full md:max-w-4xl lg:max-w-5xl bg-slate-100 min-h-screen md:min-h-[840px] md:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden pb-20 md:pb-24">
+
+    <!-- CABECERA -->
+    <header class="bg-indigo-950 text-white p-4 md:px-6 md:py-4 shadow-md sticky top-0 z-30">
+      <div class="flex justify-between items-center">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] tracking-widest text-indigo-400 font-black uppercase">GRUPO MAF</span>
+            <div id="badge-conexion" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>BD CONECTADA</span>
+            </div>
+          </div>
+          <h1 class="font-black text-lg md:text-xl leading-tight">DISTRIBUIDORA COMPARTO</h1>
+          <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-empleado">Luis Martínez (3101234567)</p>
+        </div>
+        <div class="text-right">
+          <span id="badge-turno" class="px-3 py-1 text-xs font-black rounded-full bg-amber-500 text-slate-950 uppercase shadow-sm">
+            Sin Turno
+          </span>
+          <p class="text-[11px] text-indigo-300 font-semibold mt-1" id="header-vehiculo">Camión NHR • ABC123</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto no-scrollbar">
+
+      <!-- PESTAÑA 1: VENDER / FACTURAR -->
+      <section id="tab-facturacion" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          <div class="md:col-span-7 lg:col-span-8 space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-black uppercase text-slate-500 tracking-wider">Cliente en Ruta</label>
+                <button type="button" onclick="window.cambiarPestana('clientes')" class="text-xs font-extrabold text-indigo-600 hover:text-indigo-800">
+                  + Registrar Cliente
+                </button>
+              </div>
+              <select id="select-cliente" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+                <option value="tienda-1">Tienda Don José (El Centro)</option>
+                <option value="tienda-2">Superete La Cabaña (La Primavera)</option>
+                <option value="tienda-3">Estanco El Oasis (Zona Comercial)</option>
+              </select>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div class="flex justify-between items-center mb-3">
+                <div>
+                  <h2 class="font-black text-sm md:text-base text-slate-800">Inventario en Carro</h2>
+                  <p class="text-xs text-slate-500" id="subtitulo-stock">Stock asignado a tu vehículo</p>
+                </div>
+                <span class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">Bodega Móvil</span>
+              </div>
+
+              <div class="relative mb-3">
+                <input type="text" id="buscador-productos" oninput="window.filtrarProductos()" placeholder="🔍 Buscar por nombre (ej: 1.5, lata, monster, brisa)..." class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-3 pr-8 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+                <button type="button" onclick="window.limpiarBuscador()" class="absolute right-2.5 top-2.5 text-xs text-slate-400 font-bold">✕</button>
+              </div>
+              
+              <div id="lista-productos-venta" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
+                <!-- Inyectado por JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="md:col-span-5 lg:col-span-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 md:sticky md:top-20 space-y-4">
+              <div class="border-b border-slate-100 pb-3">
+                <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider block">Resumen del Pedido</span>
+                <p class="text-3xl font-black text-slate-900 mt-1" id="total-pedido-texto">$0</p>
+                <p class="text-xs text-slate-500 mt-0.5" id="resumen-pacas-totales">0 pacas seleccionadas</p>
+              </div>
+
+              <div id="detalle-carrito-mini" class="text-xs text-slate-600 space-y-2 max-h-48 overflow-y-auto pr-1">
+                <p class="text-slate-400 italic">No hay productos agregados</p>
+              </div>
+
+              <button type="button" onclick="window.abrirModalCobro()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black text-base py-4 rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2">
+                <span>Cobrar y Remisionar</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PESTAÑA 2: TURNO / RUTA Y CAJA -->
+      <section id="tab-turno" class="space-y-4" style="display: none;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
+          <h2 class="font-black text-lg text-slate-800">Control Diario de Ruta</h2>
+          <p class="text-xs text-slate-500 mb-6">Registro de kilometraje y arqueo de valores entregados al POS[cite: 1].</p>
+
+          <div id="bloque-apertura" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">KM Inicial del Tacómetro</label>
+              <input type="number" id="input-km-inicial" placeholder="Ej: 11400" value="11400" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+            <button type="button" onclick="window.iniciarTurno()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-4 rounded-xl shadow-md transition-all">
+              Abrir Turno del Día
+            </button>
+          </div>
+
+          <div id="bloque-cierre" class="space-y-5" style="display: none;">
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex justify-between items-center text-xs">
+              <span class="font-bold text-indigo-900">KM Inicial Registrado:</span>
+              <span class="font-black text-indigo-700 text-base" id="resumen-km-inicial">11400 km</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">KM Final al Entregar el Carro</label>
+              <input type="number" id="input-km-final" placeholder="Ej: 11470" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+
+            <div class="border-t border-slate-200 pt-4 space-y-2">
+              <h3 class="text-xs font-black uppercase text-slate-500 mb-2">Liquidación de Cartera del Día</h3>
+              <div class="flex justify-between text-xs py-1.5 border-b border-slate-100">
+                <span class="text-slate-600">Efectivo Físico:</span>
+                <span class="font-bold text-slate-800 text-sm" id="cierre-efectivo">$0</span>
+              </div>
+              <div class="flex justify-between text-xs py-1.5 border-b border-slate-100">
+                <span class="text-slate-600">Nequi:</span>
+                <span class="font-bold text-slate-800 text-sm" id="cierre-nequi">$0</span>
+              </div>
+              <div class="flex justify-between text-xs py-1.5 border-b border-slate-100">
+                <span class="text-slate-600">Transferencias:</span>
+                <span class="font-bold text-slate-800 text-sm" id="cierre-transf">$0</span>
+              </div>
+              <div class="flex justify-between text-base py-3 font-black text-slate-900">
+                <span>Total a Rendir:</span>
+                <span class="text-indigo-900 text-lg" id="cierre-total-entregar">$0</span>
+              </div>
+            </div>
+
+            <button type="button" onclick="window.finalizarTurno()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-4 rounded-xl shadow-md transition-all">
+              Cerrar Turno y Cuadrar Caja
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PESTAÑA 3: PEDIDO A BODEGA NOCTURNO (CON EXTRAS) -->
+      <section id="tab-bodega" class="space-y-4" style="display: none;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto space-y-5">
+          <div>
+            <h2 class="font-black text-lg text-slate-800">Pedido Nocturno a Bodega</h2>
+            <p class="text-xs text-slate-500">Carga el stock base del carro y añade pedidos extras[cite: 1].</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1.5 uppercase">Fecha para Despacho</label>
+            <input type="date" id="fecha-solicitud-cargue" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-600">
+          </div>
+
+          <div class="border-t border-slate-200 pt-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-black uppercase text-indigo-950">1. Stock Base para Ruta (Libre Venta)</span>
+              <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded">Para el Carro</span>
+            </div>
+            <div id="lista-productos-solicitud" class="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+              <!-- Inyectado por JS -->
+            </div>
+          </div>
+
+          <div class="border-t border-slate-200 pt-4 space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-black uppercase text-amber-900">2. Pedidos Extras / Preventas</span>
+              <button type="button" onclick="window.agregarFilaPedidoExtra()" class="text-xs font-black text-amber-700 bg-amber-100 hover:bg-amber-200 px-2.5 py-1 rounded-lg">
+                + Agregar Extra
+              </button>
+            </div>
+            <div id="lista-pedidos-extras" class="space-y-2.5">
+              <!-- Se agregan dinámicamente -->
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-1">
+            <div class="flex justify-between font-bold text-slate-700">
+              <span>Pacas Stock Base:</span>
+              <span id="resumen-pacas-base">0 pacas</span>
+            </div>
+            <div class="flex justify-between font-bold text-amber-800">
+              <span>Pacas Pedidos Extras:</span>
+              <span id="resumen-pacas-extras">0 pacas</span>
+            </div>
+            <div class="flex justify-between text-sm font-black text-indigo-950 pt-1 border-t">
+              <span>Total a Cargar al Camión:</span>
+              <span id="resumen-pacas-total-cargue">0 pacas</span>
+            </div>
+          </div>
+
+          <button type="button" onclick="window.enviarSolicitudBodega()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl shadow-md transition-all">
+            Enviar Pedido Consolidado a Bodega
+          </button>
+        </div>
+      </section>
+
+      <!-- PESTAÑA 4: CLIENTES -->
+      <section id="tab-clientes" class="space-y-4" style="display: none;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
+          <h2 class="font-black text-lg text-slate-800">Crear Nuevo Cliente</h2>
+          <p class="text-xs text-slate-500 mb-4">Alta ligera para no retrasar la ruta del camión[cite: 1].</p>
+
+          <form onsubmit="window.guardarCliente(event)" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Nombre del Negocio / Tienda *</label>
+              <input type="text" id="cli-nombre-tienda" required placeholder="Ej: Tienda La 14" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Propietario / Encargado</label>
+              <input type="text" id="cli-propietario" placeholder="Ej: Carlos Gómez" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">WhatsApp / Celular *</label>
+                <input type="tel" id="cli-telefono" required placeholder="310..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Barrio</label>
+                <input type="text" id="cli-barrio" placeholder="La Esperanza" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Dirección</label>
+              <input type="text" id="cli-direccion" placeholder="Calle 15 con Carrera 8" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-md mt-2">
+              Guardar Cliente
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MODAL DE COBRO Y VUELTO -->
+    <div id="modal-cobro" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-0 md:p-4" style="display: none;">
+      <div class="bg-white w-full max-w-md rounded-t-3xl md:rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h3 class="font-black text-lg text-slate-800">Finalizar Remisión</h3>
+          <button type="button" onclick="window.cerrarModalCobro()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+        </div>
+
+        <div class="bg-indigo-50 p-4 rounded-2xl flex justify-between items-center">
+          <span class="text-xs font-bold text-indigo-900 uppercase">Total a Pagar</span>
+          <span class="text-2xl font-black text-indigo-700" id="modal-total-pagar">$0</span>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-black uppercase text-slate-500">Medio de Pago</label>
+          <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+            <button type="button" onclick="window.setMedioPago('efectivo')" id="btn-mp-efectivo" class="py-3 rounded-xl border border-indigo-600 bg-indigo-600 text-white">Efectivo</button>
+            <button type="button" onclick="window.setMedioPago('nequi')" id="btn-mp-nequi" class="py-3 rounded-xl border border-slate-300 bg-white text-slate-700">Nequi</button>
+            <button type="button" onclick="window.setMedioPago('transferencia')" id="btn-mp-transferencia" class="py-3 rounded-xl border border-slate-300 bg-white text-slate-700">Transferencia</button>
+            <button type="button" onclick="window.setMedioPago('mixto')" id="btn-mp-mixto" class="py-3 rounded-xl border border-slate-300 bg-white text-slate-700">Mixto</button>
+          </div>
+        </div>
+
+        <div id="campo-efectivo" class="space-y-2">
+          <label class="block text-xs font-bold text-slate-600 uppercase">Efectivo Recibido (Calcula Vuelto)</label>
+          <input type="number" id="input-recibido" oninput="window.calcularVuelto()" placeholder="Ej: 100000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none">
+          <div class="flex justify-between items-center text-xs font-bold bg-amber-50 p-3 rounded-xl border border-amber-200">
+            <span class="text-amber-800 uppercase">Cambio / Vuelto:</span>
+            <span class="text-amber-950 font-black text-lg" id="texto-vuelto">$0</span>
+          </div>
+        </div>
+
+        <div id="campo-mixto" class="space-y-2" style="display: none;">
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-slate-500">Efectivo</label>
+              <input type="number" id="mix-efectivo" value="0" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-bold">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-500">Nequi</label>
+              <input type="number" id="mix-nequi" value="0" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-bold">
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-slate-500">Transf.</label>
+              <input type="number" id="mix-transf" value="0" class="w-full p-2 bg-slate-50 border rounded-lg text-xs font-bold">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" onclick="window.procesarRemision()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black py-4 rounded-xl shadow-lg shadow-emerald-600/30 text-base">
+          Emitir Remisión (RM)
+        </button>
+      </div>
+    </div>
+
+    <!-- BARRA INFERIOR -->
+    <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-4 z-30 flex justify-around items-center">
+      <button type="button" onclick="window.cambiarPestana('facturacion')" id="nav-facturacion" class="flex flex-col items-center text-indigo-600 font-black text-xs md:text-sm">
+        <span class="text-lg">🛒</span>
+        <span class="mt-0.5">Vender</span>
+      </button>
+      <button type="button" onclick="window.cambiarPestana('turno')" id="nav-turno" class="flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm">
+        <span class="text-lg">⏱️</span>
+        <span class="mt-0.5">Ruta/Caja</span>
+      </button>
+      <button type="button" onclick="window.cambiarPestana('bodega')" id="nav-bodega" class="flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm">
+        <span class="text-lg">📦</span>
+        <span class="mt-0.5">Pedir Stock</span>
+      </button>
+      <button type="button" onclick="window.cambiarPestana('clientes')" id="nav-clientes" class="flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm">
+        <span class="text-lg">👥</span>
+        <span class="mt-0.5">Clientes</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <script>
+    // Repartidores registrados con sus PINs y vehículos
+    var repartidoresRegistrados = [
+      { id: 'rep-1', pin: '1140', nombre: 'Luis Martínez', tel: '3101234567', vehiculo: 'Camión NHR • ABC123', placa: 'ABC123' },
+      { id: 'rep-2', pin: '2230', nombre: 'Andrés Suárez', tel: '3124567890', vehiculo: 'Motocarguero • XYZ789', placa: 'XYZ789' }
+    ];
+
+    var repartidorActivo = null;
+
+    // PIN DE ACCESO REPARTIDOR
+    window.teclearPinRep = function(digito) {
+      var inp = document.getElementById('input-pin-rep');
+      if (inp.value.length < 4) inp.value += digito;
+      if (inp.value.length === 4) window.validarAccesoRep();
+    };
+
+    window.borrarPinRep = function() {
+      var inp = document.getElementById('input-pin-rep');
+      inp.value = inp.value.slice(0, -1);
+    };
+
+    window.validarAccesoRep = function() {
+      var pin = document.getElementById('input-pin-rep').value;
+      var rep = repartidoresRegistrados.find(r => r.pin === pin);
+
+      if (rep) {
+        repartidorActivo = rep;
+        document.getElementById('pantalla-login-repartidor').style.display = 'none';
+        document.getElementById('header-empleado').innerText = `${rep.nombre} (${rep.tel})`;
+        document.getElementById('header-vehiculo').innerText = rep.vehiculo;
+      } else {
+        alert("PIN incorrecto. Consulta con tu administrador.");
+        document.getElementById('input-pin-rep').value = '';
+      }
+    };
+
+    var productos = [
+      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor_empaque: 12, precio_mayorista: 77000, stock_minimo_alerta: 5 },
+      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor_empaque: 6, precio_mayorista: 70000, stock_minimo_alerta: 5 },
+      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor_empaque: 12, precio_mayorista: 34000, stock_minimo_alerta: 5 },
+      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor_empaque: 12, precio_mayorista: 38000, stock_minimo_alerta: 5 },
+      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor_empaque: 24, precio_mayorista: 168000, stock_minimo_alerta: 5 }
+    ];
+
+    var stockMovil = {};
+    var carrito = {};
+    var turnoActivo = null;
+    var medioPagoSeleccionado = 'efectivo';
+
+    window.cambiarPestana = function(tabId) {
+      ['facturacion', 'turno', 'bodega', 'clientes'].forEach(function(t) {
+        var el = document.getElementById('tab-' + t);
+        var nav = document.getElementById('nav-' + t);
+        if (el) el.style.display = (t === tabId) ? 'block' : 'none';
+        if (nav) {
+          nav.className = (t === tabId)
+            ? "flex flex-col items-center text-indigo-600 font-black text-xs md:text-sm"
+            : "flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm";
+        }
+      });
+    };
+
+    window.renderizarProductos = function(items) {
+      var cont = document.getElementById('lista-productos-venta');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      items.forEach(function(prod) {
+        var factor = prod.factor_empaque || 12;
+        var unidades = stockMovil[prod.id] || 0;
+        var pacasDisp = Math.floor(unidades / factor);
+        var enCarro = carrito[prod.id] ? carrito[prod.id].pacas : 0;
+
+        var card = document.createElement('div');
+        card.className = "p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex-1 pr-2">
+            <h3 class="font-extrabold text-xs text-slate-800 leading-snug">${prod.nombre}</h3>
+            <p class="text-[11px] text-slate-500 font-semibold">$${Number(prod.precio_mayorista).toLocaleString()} paca x ${factor}</p>
+            <span class="inline-block mt-0.5 text-[10px] font-black ${pacasDisp <= (prod.stock_minimo_alerta || 5) ? 'text-rose-600 bg-rose-50' : 'text-emerald-700 bg-emerald-50'} px-1.5 py-0.5 rounded">
+              En Carro: ${pacasDisp} pacas
+            </span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="window.cambiarCantidad('${prod.id}', -1, ${pacasDisp})" class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-slate-700 active:scale-95 text-sm">-</button>
+            <span class="w-5 text-center font-black text-indigo-950 text-sm">${enCarro}</span>
+            <button type="button" onclick="window.cambiarCantidad('${prod.id}', 1, ${pacasDisp})" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black active:scale-95 text-sm">+</button>
+          </div>
+        `;
+        cont.appendChild(card);
+      });
+
+      window.calcularTotal();
+    };
+
+    window.filtrarProductos = function() {
+      var q = (document.getElementById('buscador-productos').value || '').toLowerCase().trim();
+      var filtrados = productos.filter(p => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
+      window.renderizarProductos(filtrados);
+    };
+
+    window.limpiarBuscador = function() {
+      document.getElementById('buscador-productos').value = '';
+      window.renderizarProductos(productos);
+    };
+
+    window.cambiarCantidad = function(prodId, delta, maxDisp) {
+      if (!turnoActivo) {
+        alert("Primero abre turno con KM inicial en la pestaña 'Ruta/Caja'.");
+        window.cambiarPestana('turno');
+        return;
+      }
+      if (!carrito[prodId]) carrito[prodId] = { pacas: 0 };
+      var nueva = carrito[prodId].pacas + delta;
+      if (nueva > maxDisp) {
+        alert("No tienes más stock disponible en tu carro.");
+        return;
+      }
+      if (nueva >= 0) {
+        carrito[prodId].pacas = nueva;
+        window.filtrarProductos();
+      }
+    };
+
+    window.calcularTotal = function() {
+      var total = 0, totalPacas = 0;
+      var miniDetalle = document.getElementById('detalle-carrito-mini');
+      if (miniDetalle) miniDetalle.innerHTML = '';
+
+      productos.forEach(function(p) {
+        if (carrito[p.id] && carrito[p.id].pacas > 0) {
+          var sub = carrito[p.id].pacas * p.precio_mayorista;
+          total += sub;
+          totalPacas += carrito[p.id].pacas;
+          if (miniDetalle) {
+            miniDetalle.innerHTML += `
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-medium">${carrito[p.id].pacas}x ${p.nombre.split('(')[0]}</span>
+                <span class="font-bold text-slate-800">$${sub.toLocaleString()}</span>
+              </div>
+            `;
+          }
+        }
+      });
+
+      if (totalPacas === 0 && miniDetalle) {
+        miniDetalle.innerHTML = '<p class="text-slate-400 italic">No hay productos agregados</p>';
+      }
+
+      document.getElementById('total-pedido-texto').innerText = `$${total.toLocaleString()}`;
+      document.getElementById('resumen-pacas-totales').innerText = `${totalPacas} pacas seleccionadas`;
+      return total;
+    };
+
+    window.iniciarTurno = function() {
+      var km = parseFloat(document.getElementById('input-km-inicial').value);
+      if (!km || km <= 0) {
+        alert("Ingresa un KM válido.");
+        return;
+      }
+      turnoActivo = { km_inicial: km, efectivo: 0, nequi: 0, transferencia: 0 };
+      document.getElementById('badge-turno').innerText = "Ruta Abierta";
+      document.getElementById('badge-turno').className = "px-3 py-1 text-xs font-black rounded-full bg-emerald-400 text-slate-950 uppercase shadow-sm";
+      document.getElementById('bloque-apertura').style.display = 'none';
+      document.getElementById('bloque-cierre').style.display = 'block';
+      document.getElementById('resumen-km-inicial').innerText = `${km} km`;
+      window.cambiarPestana('facturacion');
+    };
+
+    window.finalizarTurno = function() {
+      var kmFin = parseFloat(document.getElementById('input-km-final').value);
+      if (!kmFin || kmFin < turnoActivo.km_inicial) {
+        alert("El KM final no puede ser menor al inicial.");
+        return;
+      }
+      alert("Turno cerrado con éxito. Listo para arqueo en POS.");
+      turnoActivo = null;
+      document.getElementById('badge-turno').innerText = "Sin Turno";
+      document.getElementById('badge-turno').className = "px-3 py-1 text-xs font-black rounded-full bg-amber-500 text-slate-950 uppercase shadow-sm";
+      document.getElementById('bloque-apertura').style.display = 'block';
+      document.getElementById('bloque-cierre').style.display = 'none';
+    };
+
+    window.abrirModalCobro = function() {
+      var total = window.calcularTotal();
+      if (total <= 0) {
+        alert("Agrega al menos una paca al pedido.");
+        return;
+      }
+      document.getElementById('modal-total-pagar').innerText = `$${total.toLocaleString()}`;
+      document.getElementById('modal-cobro').style.display = 'flex';
+      window.setMedioPago('efectivo');
+    };
+
+    window.cerrarModalCobro = function() {
+      document.getElementById('modal-cobro').style.display = 'none';
+    };
+
+    window.setMedioPago = function(mp) {
+      medioPagoSeleccionado = mp;
+      ['efectivo', 'nequi', 'transferencia', 'mixto'].forEach(function(m) {
+        var btn = document.getElementById(`btn-mp-${m}`);
+        btn.className = (m === mp)
+          ? "py-3 rounded-xl border border-indigo-600 bg-indigo-600 text-white font-bold"
+          : "py-3 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold";
+      });
+
+      document.getElementById('campo-efectivo').style.display = (mp === 'efectivo') ? 'block' : 'none';
+      document.getElementById('campo-mixto').style.display = (mp === 'mixto') ? 'block' : 'none';
+    };
+
+    window.calcularVuelto = function() {
+      var total = window.calcularTotal();
+      var recibido = parseFloat(document.getElementById('input-recibido').value) || 0;
+      var vuelto = recibido - total;
+      document.getElementById('texto-vuelto').innerText = vuelto >= 0 ? `$${vuelto.toLocaleString()}` : '$0';
+    };
+
+    window.procesarRemision = function() {
+      var total = window.calcularTotal();
+      var ef = 0, nq = 0, tr = 0;
+
+      if (medioPagoSeleccionado === 'efectivo') {
+        var recibido = parseFloat(document.getElementById('input-recibido').value) || 0;
+        if (recibido < total) {
+          alert("El efectivo recibido es menor al total.");
+          return;
+        }
+        ef = total;
+      } else if (medioPagoSeleccionado === 'nequi') {
+        nq = total;
+      } else if (medioPagoSeleccionado === 'transferencia') {
+        tr = total;
+      }
+
+      turnoActivo.efectivo += ef;
+      turnoActivo.nequi += nq;
+      turnoActivo.transferencia += tr;
+
+      document.getElementById('cierre-efectivo').innerText = `$${turnoActivo.efectivo.toLocaleString()}`;
+      document.getElementById('cierre-nequi').innerText = `$${turnoActivo.nequi.toLocaleString()}`;
+      document.getElementById('cierre-transf').innerText = `$${turnoActivo.transferencia.toLocaleString()}`;
+      document.getElementById('cierre-total-entregar').innerText = `$${(turnoActivo.efectivo + turnoActivo.nequi + turnoActivo.transferencia).toLocaleString()}`;
+
+      productos.forEach(function(p) {
+        if (carrito[p.id] && carrito[p.id].pacas > 0) {
+          stockMovil[p.id] -= (carrito[p.id].pacas * (p.factor_empaque || 12));
+        }
+      });
+
+      var placaDoc = repartidorActivo ? repartidorActivo.placa : 'ABC123';
+      var codigoRM = `RM-${placaDoc}-${Date.now().toString().slice(-4)}`;
+      alert(`¡Remisión ${codigoRM} emitida!\nTotal: $${total.toLocaleString()}`);
+
+      carrito = {};
+      window.cerrarModalCobro();
+      window.renderizarProductos(productos);
+    };
+
+    window.agregarFilaPedidoExtra = function() {
+      var idExtra = 'extra-' + Date.now();
+      var optClientes = document.getElementById('select-cliente').innerHTML;
+      var optProductos = '';
+      productos.forEach(function(p) {
+        optProductos += `<option value="${p.id}">${p.nombre}</option>`;
+      });
+
+      var div = document.createElement('div');
+      div.id = idExtra;
+      div.className = "p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2 relative";
+      div.innerHTML = `
+        <button type="button" onclick="document.getElementById('${idExtra}').remove(); window.calcularConsolidadoCargue();" class="absolute top-2 right-2 text-xs font-black text-rose-500">✕</button>
+        <div>
+          <label class="block text-[10px] font-black uppercase text-amber-900">Cliente *</label>
+          <select class="extra-cliente w-full bg-white border border-amber-300 rounded-lg p-2 text-xs font-bold text-slate-800 outline-none">${optClientes}</select>
+        </div>
+        <div class="grid grid-cols-12 gap-2">
+          <div class="col-span-8">
+            <label class="block text-[10px] font-black uppercase text-amber-900">Producto *</label>
+            <select class="extra-producto w-full bg-white border border-amber-300 rounded-lg p-2 text-xs font-semibold text-slate-800 outline-none">${optProductos}</select>
+          </div>
+          <div class="col-span-4">
+            <label class="block text-[10px] font-black uppercase text-amber-900">Pacas *</label>
+            <input type="number" oninput="window.calcularConsolidadoCargue()" min="1" value="1" class="extra-pacas w-full p-2 bg-white border border-amber-300 rounded-lg text-center text-xs font-black outline-none">
+          </div>
+        </div>
+      `;
+      document.getElementById('lista-pedidos-extras').appendChild(div);
+      window.calcularConsolidadoCargue();
+    };
+
+    window.calcularConsolidadoCargue = function() {
+      var pacasBase = 0;
+      productos.forEach(function(p) {
+        var input = document.getElementById('sol-' + p.id);
+        if (input) pacasBase += parseInt(input.value) || 0;
+      });
+
+      var pacasExtras = 0;
+      document.querySelectorAll('.extra-pacas').forEach(function(inp) {
+        pacasExtras += parseInt(inp.value) || 0;
+      });
+
+      document.getElementById('resumen-pacas-base').innerText = `${pacasBase} pacas`;
+      document.getElementById('resumen-pacas-extras').innerText = `${pacasExtras} pacas`;
+      document.getElementById('resumen-pacas-total-cargue').innerText = `${pacasBase + pacasExtras} pacas`;
+    };
+
+    window.renderizarSolicitudBodega = function() {
+      var cont = document.getElementById('lista-productos-solicitud');
+      if (!cont) return;
+      cont.innerHTML = '';
+      productos.forEach(function(p) {
+        cont.innerHTML += `
+          <div class="flex justify-between items-center p-2.5 bg-slate-50 border rounded-xl">
+            <span class="text-xs font-bold text-slate-700">${p.nombre}</span>
+            <div class="flex items-center gap-1.5">
+              <input type="number" id="sol-${p.id}" oninput="window.calcularConsolidadoCargue()" min="0" placeholder="0" class="w-16 p-2 bg-white border border-slate-300 rounded-lg text-center text-xs font-black">
+              <span class="text-xs text-slate-500 font-bold">pacas</span>
+            </div>
+          </div>
+        `;
+      });
+      window.calcularConsolidadoCargue();
+    };
+
+    window.enviarSolicitudBodega = function() {
+      alert("Solicitud consolidada (base + extras) enviada a Bodega Central.");
+    };
+
+    window.guardarCliente = function(e) {
+      e.preventDefault();
+      var nombre = document.getElementById('cli-nombre-tienda').value;
+      var opt = document.createElement('option');
+      opt.value = 'cli-' + Date.now();
+      opt.innerText = nombre + ' (Nuevo)';
+      opt.selected = true;
+      document.getElementById('select-cliente').appendChild(opt);
+      alert("Cliente guardado en ruta.");
+      window.cambiarPestana('facturacion');
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('fecha-solicitud-cargue').valueAsDate = new Date();
+      productos.forEach(function(p) {
+        stockMovil[p.id] = (p.factor_empaque || 12) * 20;
+      });
+      window.renderizarProductos(productos);
+      window.renderizarSolicitudBodega();
+    });
+  </script>
+</body>
+</html>

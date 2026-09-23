@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Mostrador - Distribuidora Comparto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media print {
+      body * { visibility: hidden !important; }
+      #ticket-impresion, #ticket-impresion * { visibility: visible !important; }
+      #ticket-impresion { position: absolute; left: 0; top: 0; width: 80mm; display: block !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-start lg:p-4">
+
+  <!-- PANTALLA DE LOGIN POS (USUARIO & CONTRASEÑA) -->
+  <div id="pantalla-login-pos" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-7 text-center space-y-5 shadow-2xl">
+      <div>
+        <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+        <h2 class="text-xl font-black text-white mt-1">ACCESO POS MOSTRADOR</h2>
+        <p class="text-xs text-slate-400">Ingresa las credenciales del punto de venta</p>
+      </div>
+
+      <form onsubmit="window.validarLoginPOS(event)" class="space-y-3.5 text-left text-xs">
+        <div>
+          <label class="block font-black text-slate-400 uppercase mb-1">Usuario *</label>
+          <input type="text" id="login-pos-user" required placeholder="admin" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-white font-bold outline-none focus:ring-2 focus:ring-indigo-600">
+        </div>
+        <div>
+          <label class="block font-black text-slate-400 uppercase mb-1">Contraseña *</label>
+          <input type="password" id="login-pos-pass" required placeholder="••••••••" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-white font-bold outline-none focus:ring-2 focus:ring-indigo-600">
+        </div>
+
+        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all mt-2">
+          Iniciar Sesión en Mostrador
+        </button>
+      </form>
+      <p class="text-[11px] text-slate-500">Predeterminado: <b>admin</b> / <b>comparto123</b></p>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL TIPO SISTEMA POS -->
+  <div class="w-full max-w-[1600px] bg-slate-100 min-h-screen lg:min-h-[920px] lg:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden pb-8">
+
+    <!-- CABECERA -->
+    <header class="bg-indigo-950 text-white p-4 lg:px-8 lg:py-4 shadow-md sticky top-0 z-30 flex flex-wrap justify-between items-center gap-3">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] tracking-widest text-indigo-400 font-black uppercase">GRUPO MAF</span>
+          <span class="text-[10px] bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded font-bold">PUNTO DE VENTA & AUDITORÍA</span>
+          
+          <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>BD CONECTADA</span>
+          </div>
+
+          <div id="badge-estado-caja" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            <span id="texto-estado-caja">CAJA CERRADA</span>
+          </div>
+        </div>
+        <h1 class="font-black text-xl lg:text-2xl leading-tight">CAJA & MOSTRADOR CENTRAL</h1>
+        <p class="text-xs text-indigo-200 mt-0.5">Consecutivo Actual: <span id="label-consecutivo-actual" class="font-black text-emerald-400 font-mono">FAC-0001</span> | Base: <span id="label-base-caja" class="font-black text-amber-300">$0</span></p>
+      </div>
+
+      <!-- BOTONES DE PESTAÑAS -->
+      <div class="flex items-center gap-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
+        <button type="button" onclick="window.cambiarVistaPOS('facturacion')" id="btn-vista-facturacion" class="px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-md transition-all flex items-center gap-1.5">
+          <span>🛒</span> <span>Facturación</span>
+        </button>
+        <button type="button" onclick="window.cambiarVistaPOS('arqueo')" id="btn-vista-arqueo" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+          <span>🚚</span> <span>Cuadre Repartidores</span>
+        </button>
+        <button type="button" onclick="window.cambiarVistaPOS('facturas_dia')" id="btn-vista-facturas_dia" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+          <span>📄</span> <span>Facturas del Día</span>
+        </button>
+        <button type="button" onclick="window.cambiarVistaPOS('cierres_historial')" id="btn-vista-cierres_historial" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+          <span>📊</span> <span>Historial Cierres</span>
+        </button>
+        <button type="button" onclick="window.abrirModalCierreDiario()" class="px-4 py-2.5 rounded-xl text-xs font-black bg-rose-600 hover:bg-rose-700 text-white shadow-md transition-all flex items-center gap-1.5">
+          <span>🔒</span> <span>Cierre de Caja</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="flex-1 p-4 lg:p-6 overflow-y-auto no-scrollbar">
+
+      <!-- VISTA 1: FACTURACIÓN MOSTRADOR -->
+      <section id="vista-pos-facturacion" class="space-y-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+          <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap sm:flex-nowrap gap-3 items-center">
+              <div class="relative flex-1">
+                <input type="text" id="pos-buscador" oninput="window.filtrarProductosPOS()" placeholder="🔍 Buscar por nombre, litraje (1.5, 3lt), lata, monster o SKU..." class="w-full bg-slate-50 border border-slate-300 rounded-xl py-3 pl-4 pr-10 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600 shadow-inner">
+                <button type="button" onclick="document.getElementById('pos-buscador').value=''; window.filtrarProductosPOS();" class="absolute right-3 top-3.5 text-xs text-slate-400 font-bold hover:text-slate-600">✕</button>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-slate-500 uppercase whitespace-nowrap">Vender por:</span>
+                <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-300 text-xs font-bold">
+                  <button type="button" onclick="window.setModoPresentacion('paca')" id="btn-modo-paca" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-black">Paca</button>
+                  <button type="button" onclick="window.setModoPresentacion('unidad')" id="btn-modo-unidad" class="px-3 py-1.5 rounded-lg text-slate-600">Unidad</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-black uppercase text-slate-500 tracking-wider">Catálogo Coca-Cola FEMSA[cite: 4]</span>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Stock Bodega Central</span>
+              </div>
+              <div id="grid-productos-pos" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pr-1">
+                <!-- Inyectado dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 xl:col-span-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 sticky top-24 space-y-4">
+              <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                  <span class="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Ticket Activo</span>
+                  <h3 class="font-black text-lg text-slate-900" id="ticket-numero-label">FAC-0001</h3>
+                </div>
+                <button type="button" onclick="window.limpiarCarritoPOS()" class="text-xs font-bold text-rose-500 hover:text-rose-700">Vaciar</button>
+              </div>
+
+              <div id="lista-items-ticket" class="space-y-2 max-h-[320px] overflow-y-auto pr-1 text-xs">
+                <p class="text-slate-400 italic py-6 text-center">No hay productos seleccionados.</p>
+              </div>
+
+              <div class="border-t border-slate-200 pt-3 space-y-2">
+                <div class="flex justify-between items-center text-slate-900">
+                  <span class="text-sm font-black uppercase">Total a Cobrar:</span>
+                  <span class="text-3xl font-black text-indigo-950" id="pos-total-texto">$0</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 pt-2">
+                <button type="button" onclick="window.abrirModalSepararCupo()" class="py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all">
+                  Apartar (24h)[cite: 1]
+                </button>
+                <button type="button" onclick="window.abrirModalCobroPOS()" class="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/30 transition-all">
+                  Cobrar y Facturar[cite: 1]
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VISTA 2: CUADRE Y LIQUIDACIÓN CON REPARTIDORES -->
+      <section id="vista-pos-arqueo" class="space-y-6" style="display: none;">
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Liquidación Diaria de Repartidores</h2>
+            <p class="text-xs text-slate-500">Concilia remisiones y productos vendidos en calle[cite: 1].</p>
+          </div>
+        </div>
+
+        <div id="contenedor-arqueos-repartidores" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+
+      <!-- VISTA 3: FACTURAS DEL DÍA -->
+      <section id="vista-pos-facturas_dia" class="space-y-6" style="display: none;">
+        <div>
+          <h2 class="text-lg lg:text-xl font-black text-slate-900">Documentos Emitidos Hoy</h2>
+          <p class="text-xs text-slate-500">Reimprime comprobantes o consulta facturas antes del cierre diario.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">Código</th>
+                  <th class="p-3.5">Tipo</th>
+                  <th class="p-3.5">Cliente</th>
+                  <th class="p-3.5">Medio Pago</th>
+                  <th class="p-3.5 text-right">Total</th>
+                  <th class="p-3.5 text-center">Estado</th>
+                  <th class="p-3.5 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-facturas-dia-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA 4: HISTORIAL DE CIERRES -->
+      <section id="vista-pos-cierres_historial" class="space-y-6" style="display: none;">
+        <div>
+          <h2 class="text-lg lg:text-xl font-black text-slate-900">Historial de Cierres y Arqueos Diarios</h2>
+          <p class="text-xs text-slate-500">Informes consolidados enviados a Administración[cite: 1].</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3.5">Fecha</th>
+                  <th class="p-3.5 text-right">Base</th>
+                  <th class="p-3.5 text-right">Efectivo</th>
+                  <th class="p-3.5 text-right">Nequi</th>
+                  <th class="p-3.5 text-right">Transf.</th>
+                  <th class="p-3.5 text-right">Diferencia</th>
+                  <th class="p-3.5 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-cierres-historial-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Inyectado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- MODAL DE APERTURA DE CAJA -->
+  <div id="modal-apertura-caja" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-40 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-5 shadow-2xl text-center">
+      <div class="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto text-2xl font-black">
+        🔓
+      </div>
+      <div>
+        <h3 class="font-black text-xl text-slate-900">Apertura de Turno en Caja</h3>
+        <p class="text-xs text-slate-500 font-medium mt-1">Ingresa el dinero en efectivo con el que inicias el día[cite: 1].</p>
+      </div>
+
+      <div class="text-left space-y-1">
+        <label class="block text-xs font-black uppercase text-slate-600">Base Inicial en Efectivo ($) *</label>
+        <input type="number" id="input-base-apertura" placeholder="Ej: 150000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-2xl font-black text-slate-900 outline-none focus:ring-2 focus:ring-indigo-600">
+      </div>
+
+      <button type="button" onclick="window.confirmarAperturaCaja()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-indigo-600/30 transition-all">
+        Abrir Caja y Comenzar Turno
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE CIERRE Y ARQUEO DIARIO (IDÉNTICO A LA IMAGEN) -->
+  <div id="modal-cierre-arqueo" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-3xl rounded-3xl p-6 lg:p-7 space-y-6 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar">
+      
+      <div class="flex justify-between items-center border-b pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-base font-black">🔒</span>
+          <h3 class="font-black text-xl text-slate-900">Cierre y Arqueo Diario</h3>
+        </div>
+        <button type="button" onclick="window.cerrarModalCierreDiario()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+
+      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
+        <div>
+          <span class="text-[10px] font-black uppercase text-slate-400 block tracking-wider">Base Caja</span>
+          <span class="font-black text-slate-800 text-base" id="arq-base-caja">$0</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-black uppercase text-slate-400 block tracking-wider">Ventas Efectivo</span>
+          <span class="font-black text-slate-800 text-base" id="arq-ventas-efectivo">$0</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-black uppercase text-slate-400 block tracking-wider">Abonos Clientes</span>
+          <span class="font-black text-emerald-600 text-base" id="arq-abonos-clientes">$0</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-black uppercase text-slate-400 block tracking-wider">Ajuste Aux.</span>
+          <span class="font-black text-emerald-600 text-base" id="arq-ajuste-aux">+$0</span>
+        </div>
+        <div class="bg-rose-50/70 p-2 rounded-xl border border-rose-100 col-span-2 sm:col-span-1">
+          <span class="text-[10px] font-black uppercase text-rose-600 block tracking-wider">Gastos / Egresos</span>
+          <span class="font-black text-rose-700 text-base" id="arq-gastos-egresos">$0</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <div class="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50/30 space-y-3">
+          <div class="flex items-center gap-1.5 text-amber-800 font-black text-xs uppercase">
+            <span>💵</span> <span>Efectivo Físico</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-slate-500 uppercase block">Esperado:</span>
+            <span class="text-lg font-black text-slate-900" id="arq-efectivo-esperado">$0</span>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Real en Caja:</label>
+            <input type="number" id="arq-input-efectivo-real" oninput="window.recalcularDiferenciasArqueo()" placeholder="Monto contado" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm font-black text-slate-900 outline-none focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div class="flex justify-between items-center text-xs font-bold pt-1 border-t border-amber-200/60">
+            <span class="text-slate-500">Diferencia:</span>
+            <span id="arq-diff-efectivo" class="font-black text-emerald-600">Cuadrado ($0)</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border-2 border-blue-200 bg-blue-50/30 space-y-3">
+          <div class="flex items-center gap-1.5 text-blue-800 font-black text-xs uppercase">
+            <span>📱</span> <span>Transferencias</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-slate-500 uppercase block">Esperado:</span>
+            <span class="text-lg font-black text-slate-900" id="arq-transf-esperado">$0</span>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Real Bancos:</label>
+            <input type="number" id="arq-input-transf-real" oninput="window.recalcularDiferenciasArqueo()" placeholder="Monto verificado" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm font-black text-slate-900 outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="flex justify-between items-center text-xs font-bold pt-1 border-t border-blue-200/60">
+            <span class="text-slate-500">Diferencia:</span>
+            <span id="arq-diff-transf" class="font-black text-emerald-600">Cuadrado ($0)</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border-2 border-purple-200 bg-purple-50/30 space-y-3">
+          <div class="flex items-center gap-1.5 text-purple-800 font-black text-xs uppercase">
+            <span>💳</span> <span>Nequi</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-slate-500 uppercase block">Esperado:</span>
+            <span class="text-lg font-black text-slate-900" id="arq-nequi-esperado">$0</span>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500 uppercase block mb-1">Real Nequi:</label>
+            <input type="number" id="arq-input-nequi-real" oninput="window.recalcularDiferenciasArqueo()" placeholder="Monto en App" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-sm font-black text-slate-900 outline-none focus:ring-2 focus:ring-purple-500">
+          </div>
+          <div class="flex justify-between items-center text-xs font-bold pt-1 border-t border-purple-200/60">
+            <span class="text-slate-500">Diferencia:</span>
+            <span id="arq-diff-nequi" class="font-black text-emerald-600">Cuadrado ($0)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="banner-diferencia-consolidada" class="p-4 rounded-2xl text-center font-black text-base transition-all bg-emerald-50 text-emerald-800 border border-emerald-200">
+        Diferencia Consolidada de Caja: $0 (Cuadrado)
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button type="button" onclick="window.cerrarModalCierreDiario()" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">
+          Cancelar
+        </button>
+        <button type="button" onclick="window.confirmarCierreTurnoEImprimir()" class="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-lg shadow-rose-600/30 flex items-center gap-2">
+          <span>🔒</span> <span>Cerrar Turno e Imprimir</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL COBRO FACTURACIÓN MOSTRADOR -->
+  <div id="modal-cobro-pos" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-xl text-slate-900" id="modal-factura-titulo">Facturar FAC-0001</h3>
+        <button type="button" onclick="window.cerrarModalCobroPOS()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-black uppercase text-slate-600">Cliente Asignado *</label>
+        <select id="modal-cliente-select" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none">
+          <option value="mostrador">Cliente Mostrador / Venta Rápida</option>
+          <option value="tienda-1">Tienda Don José (El Centro)</option>
+          <option value="tienda-2">Superete La Cabaña (La Primavera)</option>
+        </select>
+      </div>
+
+      <div class="bg-indigo-50 p-4 rounded-2xl flex justify-between items-center">
+        <span class="text-xs font-bold text-indigo-900 uppercase">Total de la Factura</span>
+        <span class="text-3xl font-black text-indigo-700" id="modal-pos-total-pagar">$0</span>
+      </div>
+
+      <div class="space-y-2">
+        <label class="block text-xs font-black uppercase text-slate-500">Forma de Pago</label>
+        <div class="grid grid-cols-4 gap-2 text-xs font-bold">
+          <button type="button" onclick="window.setMedioPagoPOS('efectivo')" id="btn-pos-mp-efectivo" class="py-2.5 rounded-xl border border-indigo-600 bg-indigo-600 text-white">Efectivo</button>
+          <button type="button" onclick="window.setMedioPagoPOS('nequi')" id="btn-pos-mp-nequi" class="py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700">Nequi</button>
+          <button type="button" onclick="window.setMedioPagoPOS('transferencia')" id="btn-pos-mp-transferencia" class="py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700">Transf.</button>
+          <button type="button" onclick="window.setMedioPagoPOS('mixto')" id="btn-pos-mp-mixto" class="py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700">Mixto</button>
+        </div>
+      </div>
+
+      <div id="bloque-efectivo-pos" class="space-y-2">
+        <label class="block text-xs font-bold text-slate-600 uppercase">Dinero Recibido (Calcula Vuelto Automático)[cite: 1]</label>
+        <input type="number" id="pos-dinero-recibido" oninput="window.calcularVueltoPOS()" placeholder="Ej: 100000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+        <div class="flex justify-between items-center text-xs font-bold bg-amber-50 p-3 rounded-xl border border-amber-200">
+          <span class="text-amber-800 uppercase">Cambio / Vuelto:</span>
+          <span class="text-amber-950 font-black text-xl" id="pos-texto-vuelto">$0</span>
+        </div>
+      </div>
+
+      <button type="button" onclick="window.emitirFacturaPOS()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-600/30 text-base">
+        Confirmar y Facturar
+      </button>
+    </div>
+  </div>
+
+  <!-- PLANTILLA IMPRESIÓN DIRECTA 80mm -->
+  <div id="ticket-impresion" class="hidden text-[12px] font-mono leading-tight p-4">
+    <div class="text-center border-b pb-2 mb-2">
+      <h2 class="font-bold text-base">DISTRIBUIDORA COMPARTO</h2>
+      <p class="text-[10px]">GRUPO MAF • NIT 901.234.567-8</p>
+      <p class="font-bold mt-1" id="ticket-print-numero">FAC-0001</p>
+      <p class="text-[10px]" id="ticket-print-fecha">Fecha: 16/09/2026</p>
+    </div>
+    <div id="ticket-print-items" class="space-y-1 border-b pb-2 mb-2 text-left"></div>
+    <div class="text-right space-y-1">
+      <p class="font-bold text-sm" id="ticket-print-total">TOTAL: $0</p>
+    </div>
+    <div class="text-center text-[10px] mt-4 border-t pt-2">
+      <p>Creado y desarrollado por: Jr Naranjo - 322 858 6808[cite: 1]</p>
+    </div>
+  </div>
+
+  <script>
+    var posUserOficial = 'admin';
+    var posPassOficial = 'comparto123';
+
+    // 1. VALIDACIÓN LOGIN POS
+    window.validarLoginPOS = function(e) {
+      e.preventDefault();
+      var u = document.getElementById('login-pos-user').value;
+      var p = document.getElementById('login-pos-pass').value;
+
+      if (u === posUserOficial && p === posPassOficial) {
+        document.getElementById('pantalla-login-pos').style.display = 'none';
+        document.getElementById('modal-apertura-caja').style.display = 'flex';
+      } else {
+        alert("Usuario o contraseña incorrectos.");
+      }
+    };
+
+    var cajaAbierta = false;
+    var baseCajaInicial = 0;
+    var consecutivoActual = 1;
+    var modoPresentacion = 'paca';
+    var carritoPOS = {};
+    var medioPagoPOSSeleccionado = 'efectivo';
+
+    var productosPOS = [
+      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, precio_paca: 77000, precio_unidad: 7500, stock: 700 },
+      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, precio_paca: 70000, precio_unidad: 13000, stock: 650 },
+      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, precio_paca: 34000, precio_unidad: 3500, stock: 800 },
+      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, precio_paca: 38000, precio_unidad: 4000, stock: 750 }
+    ];
+
+    var facturasDelDia = [];
+    var cierresHistorial = [];
+
+    var liquidacionesRepartidores = [
+      {
+        id: 'liq-001',
+        movil: 'Móvil 1 - Camión NHR (ABC123)',
+        repartidor: 'Luis Martínez',
+        remisiones: [
+          { 
+            codigo: 'RM-ABC123-0001', 
+            cliente: 'Tienda Don José', 
+            total: 345000, 
+            ef: 200000, 
+            nq: 145000, 
+            tr: 0,
+            productos_detalle: [
+              { nombre: 'Coca-Cola 1.5 Lt', cant: '4 pacas', subtotal: 308000 },
+              { nombre: 'Coca-Cola Lata 330ml', cant: '1 paca', subtotal: 37000 }
+            ]
+          }
+        ],
+        total_facturado: 345000,
+        total_efectivo: 200000,
+        total_nequi: 145000,
+        total_transf: 0,
+        estado: 'pendiente'
+      }
+    ];
+
+    window.confirmarAperturaCaja = function() {
+      var base = parseFloat(document.getElementById('input-base-apertura').value);
+      if (isNaN(base) || base < 0) return alert("Ingresa un monto base válido.");
+      baseCajaInicial = base;
+      cajaAbierta = true;
+      document.getElementById('modal-apertura-caja').style.display = 'none';
+      document.getElementById('label-base-caja').innerText = `$${baseCajaInicial.toLocaleString()}`;
+      document.getElementById('badge-estado-caja').className = "flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
+      document.getElementById('badge-estado-caja').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>CAJA ABIERTA</span>`;
+    };
+
+    window.cambiarVistaPOS = function(vista) {
+      ['facturacion', 'arqueo', 'facturas_dia', 'cierres_historial'].forEach(function(v) {
+        var sec = document.getElementById('vista-pos-' + v);
+        var btn = document.getElementById('btn-vista-' + v);
+        if (sec) sec.style.display = (v === vista) ? 'block' : 'none';
+        if (btn) {
+          btn.className = (v === vista)
+            ? "px-4 py-2.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-md transition-all flex items-center gap-1.5"
+            : "px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition-all flex items-center gap-1.5";
+        }
+      });
+      if (vista === 'arqueo') window.cargarLiquidacionesRepartidores();
+    };
+
+    window.setModoPresentacion = function(modo) {
+      modoPresentacion = modo;
+      document.getElementById('btn-modo-paca').className = (modo === 'paca') ? "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-black" : "px-3 py-1.5 rounded-lg text-slate-600";
+      document.getElementById('btn-modo-unidad').className = (modo === 'unidad') ? "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-black" : "px-3 py-1.5 rounded-lg text-slate-600";
+      window.renderizarProductosPOS(productosPOS);
+    };
+
+    window.renderizarProductosPOS = function(items) {
+      var cont = document.getElementById('grid-productos-pos');
+      if (!cont) return;
+      cont.innerHTML = items.map(prod => `
+        <div onclick="window.agregarAlCarritoPOS('${prod.id}')" class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer">
+          <div>
+            <div class="flex justify-between items-start">
+              <span class="font-mono text-[10px] text-slate-400 font-bold">${prod.sku}</span>
+              <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-black">${modoPresentacion === 'paca' ? 'Paca' : 'Unidad'}</span>
+            </div>
+            <h4 class="font-black text-xs text-slate-900 mt-1">${prod.nombre}</h4>
+          </div>
+          <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200">
+            <span class="text-xs text-slate-500">Stock: <b>${prod.stock}</b></span>
+            <span class="font-black text-indigo-900 text-sm">$${(modoPresentacion === 'paca' ? prod.precio_paca : prod.precio_unidad).toLocaleString()}</span>
+          </div>
+        </div>
+      `).join('');
+    };
+
+    window.filtrarProductosPOS = function() {
+      var q = (document.getElementById('pos-buscador').value || '').toLowerCase().trim();
+      var filtrados = productosPOS.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      window.renderizarProductosPOS(filtrados);
+    };
+
+    window.agregarAlCarritoPOS = function(prodId) {
+      if (!cajaAbierta) return alert("Debes abrir la caja con la base inicial.");
+      if (!carritoPOS[prodId]) carritoPOS[prodId] = { pacas: 0, unidades: 0 };
+      if (modoPresentacion === 'paca') carritoPOS[prodId].pacas += 1;
+      else carritoPOS[prodId].unidades += 1;
+      window.actualizarTicketPOS();
+    };
+
+    window.actualizarTicketPOS = function() {
+      var cont = document.getElementById('lista-items-ticket');
+      cont.innerHTML = '';
+      var total = 0;
+
+      Object.keys(carritoPOS).forEach(pId => {
+        var prod = productosPOS.find(p => p.id === pId);
+        var item = carritoPOS[pId];
+        if (item.pacas > 0) {
+          var subP = item.pacas * prod.precio_paca;
+          total += subP;
+          cont.innerHTML += `<div class="p-2 bg-slate-50 border rounded-xl flex justify-between"><span>${item.pacas}x ${prod.nombre} (Paca)</span><span class="font-bold">$${subP.toLocaleString()}</span></div>`;
+        }
+      });
+
+      document.getElementById('pos-total-texto').innerText = `$${total.toLocaleString()}`;
+      return total;
+    };
+
+    window.limpiarCarritoPOS = function() {
+      carritoPOS = {};
+      window.actualizarTicketPOS();
+    };
+
+    window.abrirModalCobroPOS = function() {
+      var total = window.actualizarTicketPOS();
+      if (total <= 0) return alert("Agrega productos al ticket.");
+      document.getElementById('modal-pos-total-pagar').innerText = `$${total.toLocaleString()}`;
+      document.getElementById('modal-cobro-pos').style.display = 'flex';
+      window.setMedioPagoPOS('efectivo');
+    };
+
+    window.cerrarModalCobroPOS = function() {
+      document.getElementById('modal-cobro-pos').style.display = 'none';
+    };
+
+    window.setMedioPagoPOS = function(mp) {
+      medioPagoPOSSeleccionado = mp;
+      ['efectivo', 'nequi', 'transferencia', 'mixto'].forEach(m => {
+        var btn = document.getElementById('btn-pos-mp-' + m);
+        btn.className = (m === mp)
+          ? "py-2.5 rounded-xl border border-indigo-600 bg-indigo-600 text-white font-bold"
+          : "py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold";
+      });
+      document.getElementById('bloque-efectivo-pos').style.display = (mp === 'efectivo') ? 'block' : 'none';
+    };
+
+    window.calcularVueltoPOS = function() {
+      var total = window.actualizarTicketPOS();
+      var rec = parseFloat(document.getElementById('pos-dinero-recibido').value) || 0;
+      var vuelto = rec - total;
+      document.getElementById('pos-texto-vuelto').innerText = vuelto >= 0 ? `$${vuelto.toLocaleString()}` : '$0';
+    };
+
+    window.emitirFacturaPOS = function() {
+      var total = window.actualizarTicketPOS();
+      var codigoFAC = `FAC-${String(consecutivoActual).padStart(4, '0')}`;
+      facturasDelDia.unshift({
+        codigo: codigoFAC,
+        tipo: 'Mostrador',
+        cliente: 'Cliente Mostrador',
+        total: total,
+        medio: medioPagoPOSSeleccionado,
+        ef: (medioPagoPOSSeleccionado === 'efectivo') ? total : 0,
+        nq: (medioPagoPOSSeleccionado === 'nequi') ? total : 0,
+        tr: (medioPagoPOSSeleccionado === 'transferencia') ? total : 0,
+        estado: 'emitida'
+      });
+
+      consecutivoActual++;
+      document.getElementById('label-consecutivo-actual').innerText = `FAC-${String(consecutivoActual).padStart(4, '0')}`;
+      document.getElementById('ticket-numero-label').innerText = `FAC-${String(consecutivoActual).padStart(4, '0')}`;
+
+      window.cerrarModalCobroPOS();
+      window.limpiarCarritoPOS();
+      alert(`¡Factura ${codigoFAC} generada con éxito!`);
+    };
+
+    window.cargarLiquidacionesRepartidores = function() {
+      var cont = document.getElementById('contenedor-arqueos-repartidores');
+      cont.innerHTML = liquidacionesRepartidores.map(liq => `
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex justify-between items-start border-b pb-3">
+            <div>
+              <span class="text-[10px] font-black uppercase text-indigo-600 tracking-wider">${liq.movil}</span>
+              <h3 class="font-black text-lg text-slate-900">${liq.repartidor}</h3>
+            </div>
+            <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase ${liq.estado === 'cuadrado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+              ${liq.estado === 'cuadrado' ? '✓ Caja Cuadrada' : '⏳ Pendiente Liquidar'}
+            </span>
+          </div>
+
+          <div class="space-y-2">
+            <span class="text-xs font-black uppercase text-slate-600">Detalle de Productos Vendidos:</span>
+            ${liq.remisiones.map(r => `
+              <div class="p-3 bg-slate-50 border rounded-xl text-xs space-y-1">
+                <div class="flex justify-between font-black">
+                  <span>${r.codigo} - ${r.cliente}</span>                   <span>$${r.total.toLocaleString()}</span>
+                </div>
+                ${r.productos_detalle.map(d => `<div class="flex justify-between text-slate-500"><span>• ${d.nombre} (${d.cant})</span><span>$${d.subtotal.toLocaleString()}</span></div>`).join('')}
+              </div>
+            `).join('')}
+          </div>
+
+          <button type="button" onclick="liq.estado='cuadrado'; window.cargarLiquidacionesRepartidores(); alert('Cuadre validado');" ${liq.estado === 'cuadrado' ? 'disabled' : ''} class="w-full py-3.5 ${liq.estado === 'cuadrado' ? 'bg-slate-200 text-slate-400' : 'bg-emerald-600 text-white'} font-black text-xs rounded-xl">
+            ${liq.estado === 'cuadrado' ? 'Caja Entregada' : 'Validar Cuadre Repartidor'}
+          </button>
+        </div>
+      `).join('');
+    };
+
+    window.abrirModalCierreDiario = function() {
+      if (!cajaAbierta) return alert("La caja aún está cerrada.");
+      var ventasEf = facturasDelDia.reduce((a, b) => a + b.ef, 0);
+      var efRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + b.total_efectivo, 0);
+      var nqRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + b.total_nequi, 0);
+
+      document.getElementById('arq-base-caja').innerText = `$${baseCajaInicial.toLocaleString()}`;
+      document.getElementById('arq-ventas-efectivo').innerText = `$${(ventasEf + efRep).toLocaleString()}`;
+      document.getElementById('arq-efectivo-esperado').innerText = `$${(baseCajaInicial + ventasEf + efRep).toLocaleString()}`;
+      document.getElementById('arq-nequi-esperado').innerText = `$${nqRep.toLocaleString()}`;
+      document.getElementById('modal-cierre-arqueo').style.display = 'flex';
+    };
+
+    window.cerrarModalCierreDiario = function() {
+      document.getElementById('modal-cierre-arqueo').style.display = 'none';
+    };
+
+    window.recalcularDiferenciasArqueo = function() {
+      var efEsp = parseFloat(document.getElementById('arq-efectivo-esperado').innerText.replace(/\$|\./g, '')) || 0;
+      var efReal = parseFloat(document.getElementById('arq-input-efectivo-real').value);
+      var diff = isNaN(efReal) ? -efEsp : (efReal - efEsp);
+      var lbl = document.getElementById('arq-diff-efectivo');
+      if (diff === 0) { lbl.innerText = "Cuadrado ($0)"; lbl.className = "font-black text-emerald-600"; }
+      else if (diff < 0) { lbl.innerText = `Falta -$${Math.abs(diff).toLocaleString()}`; lbl.className = "font-black text-rose-600"; }
+      else { lbl.innerText = `Sobra +$${diff.toLocaleString()}`; lbl.className = "font-black text-blue-600"; }
+    };
+
+    window.confirmarCierreTurnoEImprimir = function() {
+      alert("Turno cerrado con éxito. Informe transmitido al administrador[cite: 1].");
+      cajaAbierta = false;
+      document.getElementById('badge-estado-caja').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span><span>CAJA CERRADA</span>`;
+      window.cerrarModalCierreDiario();
+    };
+
+    window.abrirModalSepararCupo = function() {
+      alert("Cupo en efectivo separado por 24 horas[cite: 1].");
+      window.limpiarCarritoPOS();
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      window.renderizarProductosPOS(productosPOS);
+    });
+  </script>
+</body>
+</html>

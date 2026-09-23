@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Preventa - Distribuidora Comparto</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-center md:p-4">
+
+  <!-- PANTALLA DE ACCESO POR PIN DE PREVENTA (3 USUARIOS: 0000, 1234, 1111) -->
+  <div id="pantalla-login-preventa" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-6 shadow-2xl">
+      <div>
+        <span class="text-[10px] tracking-widest text-emerald-400 font-black uppercase">GRUPO MAF</span>
+        <h2 class="text-xl font-black text-white mt-1">ACCESO PREVENTA</h2>
+        <p class="text-xs text-slate-400">Selecciona tu usuario e ingresa tu PIN de ruta</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="window.seleccionarPreventista('Carlos', '0000')" id="btn-prev-carlos" class="p-2.5 rounded-xl border border-indigo-600 bg-indigo-600/30 text-white font-black text-xs">
+          👤 Carlos
+        </button>
+        <button type="button" onclick="window.seleccionarPreventista('Javier', '1234')" id="btn-prev-javier" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs">
+          👤 Javier
+        </button>
+        <button type="button" onclick="window.seleccionarPreventista('Andrés', '1111')" id="btn-prev-andres" class="p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs">
+          👤 Andrés
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <input type="password" id="input-pin-prev" readonly maxlength="4" placeholder="••••" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 text-center text-3xl font-black text-emerald-400 tracking-[0.5em] outline-none">
+        
+        <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+          <button type="button" onclick="window.teclearPinPrev('1')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">1</button>
+          <button type="button" onclick="window.teclearPinPrev('2')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">2</button>
+          <button type="button" onclick="window.teclearPinPrev('3')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">3</button>
+          <button type="button" onclick="window.teclearPinPrev('4')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">4</button>
+          <button type="button" onclick="window.teclearPinPrev('5')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">5</button>
+          <button type="button" onclick="window.teclearPinPrev('6')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">6</button>
+          <button type="button" onclick="window.teclearPinPrev('7')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">7</button>
+          <button type="button" onclick="window.teclearPinPrev('8')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">8</button>
+          <button type="button" onclick="window.teclearPinPrev('9')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">9</button>
+          <button type="button" onclick="window.borrarPinPrev()" class="h-12 rounded-xl bg-rose-950/40 text-rose-400 font-bold text-sm active:scale-95">Borrar</button>
+          <button type="button" onclick="window.teclearPinPrev('0')" class="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-black text-lg active:scale-95 transition-all">0</button>
+          <button type="button" onclick="window.validarAccesoPrev()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-500">PINs: Carlos (<b>0000</b>), Javier (<b>1234</b>), Andrés (<b>1111</b>)</p>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR SMARTPHONE / TABLET PREVENTA -->
+  <div class="w-full max-w-full md:max-w-4xl lg:max-w-5xl bg-slate-100 min-h-screen md:min-h-[840px] md:rounded-3xl shadow-2xl relative flex flex-col overflow-hidden pb-20 md:pb-24">
+
+    <!-- CABECERA -->
+    <header class="bg-indigo-950 text-white p-4 md:px-6 md:py-4 shadow-md sticky top-0 z-30 flex justify-between items-center">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] tracking-widest text-indigo-400 font-black uppercase">GRUPO MAF</span>
+          <span class="text-[10px] bg-indigo-800 text-indigo-200 px-1.5 py-0.5 rounded font-bold">PREVENTA & CENSO</span>
+        </div>
+        <h1 class="font-black text-lg md:text-xl leading-tight">DISTRIBUIDORA COMPARTO</h1>
+        <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-prev-nombre">Carlos Méndez (Zona Centro)</p>
+      </div>
+      <div class="text-right">
+        <span class="px-2.5 py-1 text-[11px] font-black rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+          Toma Pedidos
+        </span>
+        <p class="text-[10px] text-indigo-300 font-semibold mt-1">Sin Stock Físico</p>
+      </div>
+    </header>
+
+    <!-- CUERPO PRINCIPAL -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto no-scrollbar">
+
+      <!-- PESTAÑA 1: TOMA DE PEDIDO A CLIENTE -->
+      <section id="tab-pedidos" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          <div class="md:col-span-7 lg:col-span-8 space-y-4">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-xs font-black uppercase text-slate-500 tracking-wider">Cliente de la Ruta *</label>
+                <button type="button" onclick="window.cambiarPestana('censo')" class="text-xs font-extrabold text-indigo-600 hover:text-indigo-800">
+                  + Prospecto / Nuevo
+                </button>
+              </div>
+              <select id="select-cliente-prev" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+                <option value="cli-1">Tienda Don José (El Centro)</option>
+                <option value="cli-2">Superete La Cabaña (La Primavera)</option>
+                <option value="cli-3">Estanco El Oasis (Zona Rosa)</option>
+              </select>
+            </div>
+
+            <!-- CATÁLOGO PARA PREVENTA CON CONSULTA DE STOCK BODEGA CENTRAL -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+              <div class="flex justify-between items-center mb-3">
+                <div>
+                  <h2 class="font-black text-sm md:text-base text-slate-800">Catálogo Coca-Cola FEMSA</h2>
+                  <p class="text-xs text-slate-500">Consulta stock proyectado en Bodega Central</p>
+                </div>
+                <span class="text-xs font-black text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-md">Precio Mayorista</span>
+              </div>
+
+              <div class="relative mb-3">
+                <input type="text" id="buscador-prev" oninput="window.filtrarCatalogoPrev()" placeholder="🔍 Buscar producto (ej: 1.5, 3lt, lata, monster)..." class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 pl-3 pr-8 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+                <button type="button" onclick="document.getElementById('buscador-prev').value=''; window.filtrarCatalogoPrev();" class="absolute right-2.5 top-2.5 text-xs text-slate-400 font-bold">✕</button>
+              </div>
+
+              <div id="lista-catalogo-prev" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
+                <!-- Inyectado por JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMEN Y ENVÍO DEL PEDIDO A BODEGA -->
+          <div class="md:col-span-5 lg:col-span-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 md:sticky md:top-20 space-y-4">
+              <div class="border-b border-slate-100 pb-3">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Pedido Preventa</span>
+                <p class="text-3xl font-black text-slate-900 mt-1" id="total-pedido-prev-texto">$0</p>
+                <p class="text-xs text-slate-500 mt-0.5" id="resumen-pacas-prev">0 pacas seleccionadas</p>
+              </div>
+
+              <div id="detalle-pedido-prev-mini" class="text-xs text-slate-600 space-y-2 max-h-48 overflow-y-auto pr-1">
+                <p class="text-slate-400 italic">No hay productos en el pedido</p>
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-black uppercase text-slate-500 mb-1">Fecha de Entrega Deseada *</label>
+                <input type="date" id="prev-fecha-entrega" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none">
+              </div>
+
+              <button type="button" onclick="window.enviarPedidoPreventa()" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] transition-all text-white font-black text-sm py-4 rounded-2xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+                <span>📋</span> <span>Enviar Pedido a Bodega</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- PESTAÑA 2: CENSO COMERCIAL & ESTUDIO DE CRÉDITO -->
+      <section id="tab-censo" class="space-y-4" style="display: none;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto space-y-4">
+          <div>
+            <h2 class="font-black text-lg text-slate-800">Censo Comercial & Apertura de Cliente</h2>
+            <p class="text-xs text-slate-500">Levantamiento de campo para estudio de mercado y asignación de crédito en administración.</p>
+          </div>
+
+          <form onsubmit="window.guardarProspectoCenso(event)" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block font-black text-slate-600 uppercase mb-1">Nombre Comercial de la Tienda *</label>
+              <input type="text" id="censo-tienda" required placeholder="Ej: Supertienda Los Paisas" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none focus:ring-2 focus:ring-indigo-600">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-black text-slate-600 uppercase mb-1">Nombre Propietario *</label>
+                <input type="text" id="censo-prop" required placeholder="Ej: Jairo Medina" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+              </div>
+              <div>
+                <label class="block font-black text-slate-600 uppercase mb-1">WhatsApp / Contacto *</label>
+                <input type="tel" id="censo-tel" required placeholder="310..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-black text-slate-600 uppercase mb-1">Barrio *</label>
+                <input type="text" id="censo-barrio" required placeholder="Ej: La Esperanza" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+              </div>
+              <div>
+                <label class="block font-black text-slate-600 uppercase mb-1">Dirección Exacta</label>
+                <input type="text" id="censo-dir" placeholder="Calle 12 con Cra 5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+              </div>
+            </div>
+
+            <div class="border-t pt-3 space-y-3">
+              <span class="text-[10px] font-black uppercase text-indigo-900 block tracking-wider">Estudio de Mercado & Potencial</span>
+              
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block font-bold text-slate-500 mb-1">Potencial de Compra</label>
+                  <select id="censo-potencial" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+                    <option value="Alto">Alto (> 30 pacas/sem)</option>
+                    <option value="Medio">Medio (10 a 30 pacas/sem)</option>
+                    <option value="Bajo">Bajo (< 10 pacas/sem)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-bold text-slate-500 mb-1">Competencia que Vende</label>
+                  <input type="text" id="censo-competencia" placeholder="Ej: Postobón directo, Bavaria" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold outline-none">
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-500 mb-1">Solicitud de Cupo de Crédito Sugerido</label>
+                <input type="number" id="censo-cupo-sug" placeholder="Ej: 2000000" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-black text-slate-800 outline-none">
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md transition-all mt-2">
+              Guardar y Transmitir Prospecto a Administración
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- PESTAÑA 3: VISITA SIN VENTA -->
+      <section id="tab-no-venta" class="space-y-4" style="display: none;">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto space-y-4">
+          <div>
+            <h2 class="font-black text-lg text-slate-800">Registro de Visita Sin Venta</h2>
+            <p class="text-xs text-slate-500">Mide la cobertura de la ruta y documenta por qué un cliente no compró hoy[cite: 1].</p>
+          </div>
+
+          <form onsubmit="window.guardarVisitaSinVenta(event)" class="space-y-3.5 text-xs">
+            <div>
+              <label class="block font-black text-slate-600 uppercase mb-1">Cliente Visitado *</label>
+              <select id="nv-cliente" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none"></select>
+            </div>
+
+            <div>
+              <label class="block font-black text-slate-600 uppercase mb-1">Motivo Principal de No Compra *[cite: 1]</label>
+              <select id="nv-motivo" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+                <option value="Neveras y bodega con stock suficiente">Neveras y bodega con stock suficiente</option>
+                <option value="Propietario / encargado no se encontraba">Propietario / encargado no se encontraba</option>
+                <option value="Sin presupuesto de contado hoy">Sin presupuesto de contado hoy</option>
+                <option value="Establecimiento cerrado">Establecimiento cerrado</option>
+                <option value="Tiene crédito vencido pendiente de pago">Tiene crédito vencido pendiente de pago</option>
+                <option value="Compró a la competencia">Compró a la competencia</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-black text-slate-600 uppercase mb-1">Observación Adicional</label>
+              <textarea id="nv-obs" rows="3" placeholder="Ej: Visitar de nuevo el jueves después de las 3 PM..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold outline-none"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white font-black rounded-xl shadow-md transition-all">
+              Registrar Visita en el Historial de Ruta
+            </button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR PREVENTA -->
+    <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-3 px-4 z-30 flex justify-around items-center">
+      <button type="button" onclick="window.cambiarPestana('pedidos')" id="nav-prev-pedidos" class="flex flex-col items-center text-indigo-600 font-black text-xs md:text-sm">
+        <span class="text-lg">📋</span>
+        <span class="mt-0.5">Tomar Pedido</span>
+      </button>
+      <button type="button" onclick="window.cambiarPestana('censo')" id="nav-prev-censo" class="flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm">
+        <span class="text-lg">📍</span>
+        <span class="mt-0.5">Censo / Nuevo</span>
+      </button>
+      <button type="button" onclick="window.cambiarPestana('no-venta')" id="nav-prev-no-venta" class="flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm">
+        <span class="text-lg">🚫</span>
+        <span class="mt-0.5">Visita Sin Venta</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- SCRIPT DEFINITIVO DE CONTROL PREVENTA -->
+  <script>
+    // 3 PINs de Preventa
+    var pinsPreventa = {
+      'Carlos': '0000',
+      'Javier': '1234',
+      'Andrés': '1111'
+    };
+    var preventistaActivo = 'Carlos';
+
+    // 1. CONTROL DE ACCESO
+    window.seleccionarPreventista = function(nombre, pinDefault) {
+      preventistaActivo = nombre;
+      ['Carlos', 'Javier', 'Andrés'].forEach(function(u) {
+        var btn = document.getElementById('btn-prev-' + u.toLowerCase());
+        btn.className = (u === nombre)
+          ? "p-2.5 rounded-xl border border-indigo-600 bg-indigo-600/30 text-white font-black text-xs"
+          : "p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 font-bold text-xs";
+      });
+      document.getElementById('input-pin-prev').value = '';
+    };
+
+    window.teclearPinPrev = function(d) {
+      var inp = document.getElementById('input-pin-prev');
+      if (inp.value.length < 4) inp.value += d;
+      if (inp.value.length === 4) window.validarAccesoPrev();
+    };
+
+    window.borrarPinPrev = function() {
+      var inp = document.getElementById('input-pin-prev');
+      inp.value = inp.value.slice(0, -1);
+    };
+
+    window.validarAccesoPrev = function() {
+      var pin = document.getElementById('input-pin-prev').value;
+      if (pin === pinsPreventa[preventistaActivo]) {
+        document.getElementById('pantalla-login-preventa').style.display = 'none';
+        document.getElementById('header-prev-nombre').innerText = `${preventistaActivo} (Ruta Activa)`;
+      } else {
+        alert("PIN incorrecto.");
+        document.getElementById('input-pin-prev').value = '';
+      }
+    };
+
+    // 2. CATÁLOGO CON STOCK DISPONIBLE EN BODEGA CENTRAL
+    var catalogoPrev = [
+      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, precio: 75000, stock_central: 700 },
+      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, precio: 68000, stock_central: 650 },
+      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, precio: 33000, stock_central: 800 },
+      { id: 'KO-004', sku: 'KO-004', nombre: 'Coca-Cola 2.25 Lt (2.25 Lt)', factor: 8, precio: 67000, stock_central: 720 },
+      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, precio: 37000, stock_central: 750 },
+      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor: 24, precio: 165000, stock_central: 600 },
+      { id: 'KO-029', sku: 'KO-029', nombre: 'Monster Green Lata 473 ml', factor: 12, precio: 88000, stock_central: 650 }
+    ];
+
+    var carritoPrev = {}; // { prodId: pacas }
+
+    // 3. NAVEGACIÓN ENTRE PESTAÑAS PREVENTA
+    window.cambiarPestana = function(tabId) {
+      ['pedidos', 'censo', 'no-venta'].forEach(function(t) {
+        var sec = document.getElementById('tab-' + t);
+        var nav = document.getElementById('nav-prev-' + t);
+        if (sec) sec.style.display = (t === tabId) ? 'block' : 'none';
+        if (nav) {
+          nav.className = (t === tabId)
+            ? "flex flex-col items-center text-indigo-600 font-black text-xs md:text-sm"
+            : "flex flex-col items-center text-slate-400 font-bold text-xs md:text-sm";
+        }
+      });
+    };
+
+    // 4. RENDERIZADO DEL CATÁLOGO PARA PREVENTA
+    window.renderizarCatalogoPrev = function(items) {
+      var cont = document.getElementById('lista-catalogo-prev');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      items.forEach(function(prod) {
+        var enPedido = carritoPrev[prod.id] || 0;
+        var card = document.createElement('div');
+        card.className = "p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between";
+        card.innerHTML = `
+          <div class="flex-1 pr-2">
+            <h3 class="font-extrabold text-xs text-slate-800 leading-snug">${prod.nombre}</h3>
+            <p class="text-[11px] text-slate-500 font-semibold">$${prod.precio.toLocaleString()} paca x ${prod.factor}</p>
+            <span class="inline-block mt-0.5 text-[10px] font-black text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+              Stock Central: ${prod.stock_central} pacas
+            </span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="window.cambiarCantidadPrev('${prod.id}', -1)" class="w-8 h-8 rounded-xl bg-white border border-slate-300 font-black text-slate-700 active:scale-95 text-sm">-</button>
+            <span class="w-5 text-center font-black text-indigo-950 text-sm">${enPedido}</span>
+            <button type="button" onclick="window.cambiarCantidadPrev('${prod.id}', 1)" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black active:scale-95 text-sm">+</button>
+          </div>
+        `;
+        cont.appendChild(card);
+      });
+
+      window.calcularTotalPrev();
+    };
+
+    window.filtrarCatalogoPrev = function() {
+      var q = (document.getElementById('buscador-prev').value || '').toLowerCase().trim();
+      var filtrados = catalogoPrev.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      window.renderizarCatalogoPrev(filtrados);
+    };
+
+    window.cambiarCantidadPrev = function(prodId, delta) {
+      if (!carritoPrev[prodId]) carritoPrev[prodId] = 0;
+      var nueva = carritoPrev[prodId] + delta;
+      if (nueva >= 0) {
+        carritoPrev[prodId] = nueva;
+        window.filtrarCatalogoPrev();
+      }
+    };
+
+    window.calcularTotalPrev = function() {
+      var total = 0, totalPacas = 0;
+      var miniDetalle = document.getElementById('detalle-pedido-prev-mini');
+      if (miniDetalle) miniDetalle.innerHTML = '';
+
+      catalogoPrev.forEach(function(p) {
+        if (carritoPrev[p.id] && carritoPrev[p.id] > 0) {
+          var sub = carritoPrev[p.id] * p.precio;
+          total += sub;
+          totalPacas += carritoPrev[p.id];
+          if (miniDetalle) {
+            miniDetalle.innerHTML += `
+              <div class="flex justify-between items-center text-xs">
+                <span>${carritoPrev[p.id]}x ${p.nombre.split('(')[0]}</span>
+                <span class="font-bold text-slate-900">$${sub.toLocaleString()}</span>
+              </div>
+            `;
+          }
+        }
+      });
+
+      if (totalPacas === 0 && miniDetalle) {
+        miniDetalle.innerHTML = '<p class="text-slate-400 italic">No hay productos en el pedido</p>';
+      }
+
+      document.getElementById('total-pedido-prev-texto').innerText = `$${total.toLocaleString()}`;
+      document.getElementById('resumen-pacas-prev').innerText = `${totalPacas} pacas seleccionadas`;
+      return total;
+    };
+
+    window.enviarPedidoPreventa = function() {
+      var total = window.calcularTotalPrev();
+      if (total <= 0) return alert("Agrega al menos una paca al pedido.");
+
+      var selCli = document.getElementById('select-cliente-prev');
+      var clienteNombre = selCli.options[selCli.selectedIndex].text;
+      var fechaEntrega = document.getElementById('prev-fecha-entrega').value;
+
+      var numPed = `PED-PRE-${Date.now().toString().slice(-4)}`;
+      alert(`¡Pedido ${numPed} registrado!\nCliente: ${clienteNombre}\nTotal: $${total.toLocaleString()}\nFecha de entrega: ${fechaEntrega}\nTransmitido a Bodega Central para despacho[cite: 1].`);
+
+      carritoPrev = {};
+      window.filtrarCatalogoPrev();
+    };
+
+    // 5. CENSO COMERCIAL & PROSPECCIÓN
+    window.guardarProspectoCenso = function(e) {
+      e.preventDefault();
+      var tienda = document.getElementById('censo-tienda').value;
+      var prop = document.getElementById('censo-prop').value;
+      var tel = document.getElementById('censo-tel').value;
+      var barrio = document.getElementById('censo-barrio').value;
+      var potencial = document.getElementById('censo-potencial').value;
+      var cupoSug = document.getElementById('censo-cupo-sug').value || '0';
+
+      alert(`¡Prospecto registrado!\nTienda: ${tienda}\nPropietario: ${prop}\nPotencial: ${potencial}\nCupo sugerido: $${parseFloat(cupoSug).toLocaleString()}.\nEnviado a Administración para estudio de crédito[cite: 1].`);
+
+      // Agregar de inmediato al desplegable de clientes para tomar pedido si desea
+      var opt = document.createElement('option');
+      opt.value = 'cli-' + Date.now();
+      opt.innerText = `${tienda} (${barrio}) [Nuevo]`;
+      opt.selected = true;
+      document.getElementById('select-cliente-prev').appendChild(opt);
+
+      // Limpiar formulario y volver a pedidos
+      document.getElementById('censo-tienda').value = '';
+      document.getElementById('censo-prop').value = '';
+      document.getElementById('censo-tel').value = '';
+      document.getElementById('censo-dir').value = '';
+      window.cambiarPestana('pedidos');
+    };
+
+    // 6. VISITA SIN VENTA
+    window.guardarVisitaSinVenta = function(e) {
+      e.preventDefault();
+      var selCli = document.getElementById('nv-cliente');
+      var cliNombre = selCli.options[selCli.selectedIndex].text;
+      var motivo = document.getElementById('nv-motivo').value;
+
+      alert(`Visita sin venta asentada:\nCliente: ${cliNombre}\nMotivo: ${motivo}\nRegistrado en la auditoría de cobertura[cite: 1].`);
+      document.getElementById('nv-obs').value = '';
+      window.cambiarPestana('pedidos');
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      var manana = new Date();
+      manana.setDate(manana.getDate() + 1);
+      document.getElementById('prev-fecha-entrega').value = manana.toISOString().split('T')[0];
+
+      // Llenar select de no venta con clientes iniciales
+      var selCli = document.getElementById('select-cliente-prev');
+      var selNV = document.getElementById('nv-cliente');
+      for (var i = 0; i < selCli.options.length; i++) {
+        var o = document.createElement('option');
+        o.value = selCli.options[i].value;
+        o.innerText = selCli.options[i].innerText;
+        selNV.appendChild(o);
+      }
+
+      window.renderizarCatalogoPrev(catalogoPrev);
+    });
+  </script>
+</body>
+</html>
