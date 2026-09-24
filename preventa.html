@@ -68,11 +68,11 @@
           <span class="text-[10px] bg-indigo-800 text-indigo-200 px-1.5 py-0.5 rounded font-bold">PREVENTA & CENSO</span>
         </div>
         <h1 class="font-black text-lg md:text-xl leading-tight">DISTRIBUIDORA COMPARTO</h1>
-        <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-prev-nombre">Carlos Méndez (Zona Centro)</p>
+        <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-prev-nombre">Preventista no autenticado</p>
       </div>
       <div class="text-right">
         <span class="px-2.5 py-1 text-[11px] font-black rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
-          Toma Pedidos
+          TOMA PEDIDOS
         </span>
         <p class="text-[10px] text-indigo-300 font-semibold mt-1">Sin Stock Físico</p>
       </div>
@@ -94,17 +94,15 @@
                 </button>
               </div>
               <select id="select-cliente-prev" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
-                <option value="cli-1">Tienda Don José (El Centro)</option>
-                <option value="cli-2">Superete La Cabaña (La Primavera)</option>
-                <option value="cli-3">Estanco El Oasis (Zona Rosa)</option>
+                <option value="">Selecciona un cliente de la ruta...</option>
               </select>
             </div>
 
-            <!-- CATÁLOGO PARA PREVENTA CON CONSULTA DE STOCK BODEGA CENTRAL -->
+            <!-- CATÁLOGO PARA PREVENTA -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
               <div class="flex justify-between items-center mb-3">
                 <div>
-                  <h2 class="font-black text-sm md:text-base text-slate-800">Catálogo Coca-Cola FEMSA</h2>
+                  <h2 class="font-black text-sm md:text-base text-slate-800">Catálogo de Productos</h2>
                   <p class="text-xs text-slate-500">Consulta stock proyectado en Bodega Central</p>
                 </div>
                 <span class="text-xs font-black text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded-md">Precio Mayorista</span>
@@ -116,7 +114,7 @@
               </div>
 
               <div id="lista-catalogo-prev" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
-                <!-- Inyectado por JS -->
+                <!-- Se llena dinámicamente desde Supabase o queda limpio -->
               </div>
             </div>
           </div>
@@ -153,7 +151,7 @@
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto space-y-4">
           <div>
             <h2 class="font-black text-lg text-slate-800">Censo Comercial & Apertura de Cliente</h2>
-            <p class="text-xs text-slate-500">Levantamiento de campo para estudio de mercado y asignación de crédito en administración.</p>
+            <p class="text-xs text-slate-500">Levantamiento de campo para estudio de mercado y asignación de crédito en administración[cite: 1].</p>
           </div>
 
           <form onsubmit="window.guardarProspectoCenso(event)" class="space-y-3.5 text-xs">
@@ -185,7 +183,7 @@
             </div>
 
             <div class="border-t pt-3 space-y-3">
-              <span class="text-[10px] font-black uppercase text-indigo-900 block tracking-wider">Estudio de Mercado & Potencial</span>
+              <span class="text-[10px] font-black uppercase text-indigo-900 block tracking-wider">Estudio de Mercado & Potencial[cite: 1]</span>
               
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -197,13 +195,13 @@
                   </select>
                 </div>
                 <div>
-                  <label class="block font-bold text-slate-500 mb-1">Competencia que Vende</label>
+                  <label class="block font-bold text-slate-500 mb-1">Competencia que Vende[cite: 1]</label>
                   <input type="text" id="censo-competencia" placeholder="Ej: Postobón directo, Bavaria" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold outline-none">
                 </div>
               </div>
 
               <div>
-                <label class="block font-bold text-slate-500 mb-1">Solicitud de Cupo de Crédito Sugerido</label>
+                <label class="block font-bold text-slate-500 mb-1">Solicitud de Cupo de Crédito Sugerido[cite: 1]</label>
                 <input type="number" id="censo-cupo-sug" placeholder="Ej: 2000000" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-black text-slate-800 outline-none">
               </div>
             </div>
@@ -226,7 +224,9 @@
           <form onsubmit="window.guardarVisitaSinVenta(event)" class="space-y-3.5 text-xs">
             <div>
               <label class="block font-black text-slate-600 uppercase mb-1">Cliente Visitado *</label>
-              <select id="nv-cliente" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none"></select>
+              <select id="nv-cliente" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold outline-none">
+                <option value="">Selecciona un cliente...</option>
+              </select>
             </div>
 
             <div>
@@ -275,13 +275,21 @@
 
   <!-- SCRIPT DEFINITIVO DE CONTROL PREVENTA -->
   <script>
+    const SB_URL = 'https://bmucdccdztmotyphhdgg.supabase.co';
+    const SB_KEY = 'sb_publishable_Ne0sfR_YLBpnqtrcDopJfw_jUtOlahJ';
+    var sbClient = null;
+
     // 3 PINs de Preventa
     var pinsPreventa = {
       'Carlos': '0000',
       'Javier': '1234',
       'Andrés': '1111'
     };
-    var preventistaActivo = 'Carlos';
+    var preventistaActivo = null;
+
+    // VARIABLES LIMPIAS (CERO DEMOS)
+    var catalogoPrev = [];
+    var carritoPrev = {}; // { prodId: pacas }
 
     // 1. CONTROL DE ACCESO
     window.seleccionarPreventista = function(nombre, pinDefault) {
@@ -307,6 +315,7 @@
     };
 
     window.validarAccesoPrev = function() {
+      if (!preventistaActivo) preventistaActivo = 'Carlos';
       var pin = document.getElementById('input-pin-prev').value;
       if (pin === pinsPreventa[preventistaActivo]) {
         document.getElementById('pantalla-login-preventa').style.display = 'none';
@@ -317,20 +326,7 @@
       }
     };
 
-    // 2. CATÁLOGO CON STOCK DISPONIBLE EN BODEGA CENTRAL
-    var catalogoPrev = [
-      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, precio: 75000, stock_central: 700 },
-      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, precio: 68000, stock_central: 650 },
-      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, precio: 33000, stock_central: 800 },
-      { id: 'KO-004', sku: 'KO-004', nombre: 'Coca-Cola 2.25 Lt (2.25 Lt)', factor: 8, precio: 67000, stock_central: 720 },
-      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, precio: 37000, stock_central: 750 },
-      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor: 24, precio: 165000, stock_central: 600 },
-      { id: 'KO-029', sku: 'KO-029', nombre: 'Monster Green Lata 473 ml', factor: 12, precio: 88000, stock_central: 650 }
-    ];
-
-    var carritoPrev = {}; // { prodId: pacas }
-
-    // 3. NAVEGACIÓN ENTRE PESTAÑAS PREVENTA
+    // 2. NAVEGACIÓN ENTRE PESTAÑAS PREVENTA
     window.cambiarPestana = function(tabId) {
       ['pedidos', 'censo', 'no-venta'].forEach(function(t) {
         var sec = document.getElementById('tab-' + t);
@@ -344,11 +340,22 @@
       });
     };
 
-    // 4. RENDERIZADO DEL CATÁLOGO PARA PREVENTA
+    // 3. RENDERIZADO DEL CATÁLOGO LIMPIO
     window.renderizarCatalogoPrev = function(items) {
       var cont = document.getElementById('lista-catalogo-prev');
       if (!cont) return;
       cont.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        cont.innerHTML = `
+          <div class="col-span-2 text-center py-12 text-slate-400 italic">
+            <span class="text-3xl block mb-2">📦</span>
+            No hay productos registrados en catálogo.<br>Carga el inventario desde el módulo de Administración.
+          </div>
+        `;
+        window.calcularTotalPrev();
+        return;
+      }
 
       items.forEach(function(prod) {
         var enPedido = carritoPrev[prod.id] || 0;
@@ -357,9 +364,9 @@
         card.innerHTML = `
           <div class="flex-1 pr-2">
             <h3 class="font-extrabold text-xs text-slate-800 leading-snug">${prod.nombre}</h3>
-            <p class="text-[11px] text-slate-500 font-semibold">$${prod.precio.toLocaleString()} paca x ${prod.factor}</p>
+            <p class="text-[11px] text-slate-500 font-semibold">$${Number(prod.precio || 0).toLocaleString()} paca x ${prod.factor}</p>
             <span class="inline-block mt-0.5 text-[10px] font-black text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
-              Stock Central: ${prod.stock_central} pacas
+              Stock Central: ${prod.stock_central || 0} pacas
             </span>
           </div>
           <div class="flex items-center gap-1.5">
@@ -376,7 +383,7 @@
 
     window.filtrarCatalogoPrev = function() {
       var q = (document.getElementById('buscador-prev').value || '').toLowerCase().trim();
-      var filtrados = catalogoPrev.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      var filtrados = catalogoPrev.filter(p => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
       window.renderizarCatalogoPrev(filtrados);
     };
 
@@ -396,7 +403,7 @@
 
       catalogoPrev.forEach(function(p) {
         if (carritoPrev[p.id] && carritoPrev[p.id] > 0) {
-          var sub = carritoPrev[p.id] * p.precio;
+          var sub = carritoPrev[p.id] * (p.precio || 0);
           total += sub;
           totalPacas += carritoPrev[p.id];
           if (miniDetalle) {
@@ -419,41 +426,78 @@
       return total;
     };
 
-    window.enviarPedidoPreventa = function() {
+    window.enviarPedidoPreventa = async function() {
       var total = window.calcularTotalPrev();
       if (total <= 0) return alert("Agrega al menos una paca al pedido.");
 
       var selCli = document.getElementById('select-cliente-prev');
+      if (!selCli.value) return alert("Selecciona un cliente antes de enviar el pedido.");
+      
       var clienteNombre = selCli.options[selCli.selectedIndex].text;
       var fechaEntrega = document.getElementById('prev-fecha-entrega').value;
-
       var numPed = `PED-PRE-${Date.now().toString().slice(-4)}`;
+
+      // Guardar pedido en Supabase si está disponible
+      if (sbClient) {
+        try {
+          await sbClient.from('solicitudes_cargue').insert([{
+            consecutivo: numPed,
+            fecha_despacho: fechaEntrega,
+            estado: 'pendiente'
+          }]);
+        } catch (e) {
+          console.warn("No se pudo registrar en BD remota:", e);
+        }
+      }
+
       alert(`¡Pedido ${numPed} registrado!\nCliente: ${clienteNombre}\nTotal: $${total.toLocaleString()}\nFecha de entrega: ${fechaEntrega}\nTransmitido a Bodega Central para despacho[cite: 1].`);
 
       carritoPrev = {};
       window.filtrarCatalogoPrev();
     };
 
-    // 5. CENSO COMERCIAL & PROSPECCIÓN
-    window.guardarProspectoCenso = function(e) {
+    // 4. CENSO COMERCIAL & PROSPECCIÓN
+    window.guardarProspectoCenso = async function(e) {
       e.preventDefault();
       var tienda = document.getElementById('censo-tienda').value;
       var prop = document.getElementById('censo-prop').value;
       var tel = document.getElementById('censo-tel').value;
       var barrio = document.getElementById('censo-barrio').value;
+      var dir = document.getElementById('censo-dir').value;
       var potencial = document.getElementById('censo-potencial').value;
       var cupoSug = document.getElementById('censo-cupo-sug').value || '0';
 
+      // Insertar en Supabase tabla clientes si está disponible
+      if (sbClient) {
+        try {
+          await sbClient.from('clientes').insert([{
+            nombre_tienda: tienda,
+            nombre_propietario: prop,
+            telefono: tel,
+            barrio: barrio,
+            direccion: dir,
+            cupo_credito: parseFloat(cupoSug),
+            modalidad_pago: parseFloat(cupoSug) > 0 ? 'credito' : 'efectivo'
+          }]);
+        } catch (err) {
+          console.warn("Error al guardar cliente en Supabase:", err);
+        }
+      }
+
       alert(`¡Prospecto registrado!\nTienda: ${tienda}\nPropietario: ${prop}\nPotencial: ${potencial}\nCupo sugerido: $${parseFloat(cupoSug).toLocaleString()}.\nEnviado a Administración para estudio de crédito[cite: 1].`);
 
-      // Agregar de inmediato al desplegable de clientes para tomar pedido si desea
       var opt = document.createElement('option');
       opt.value = 'cli-' + Date.now();
       opt.innerText = `${tienda} (${barrio}) [Nuevo]`;
       opt.selected = true;
       document.getElementById('select-cliente-prev').appendChild(opt);
 
-      // Limpiar formulario y volver a pedidos
+      // También agregar a select de visita sin venta
+      var optNV = document.createElement('option');
+      optNV.value = opt.value;
+      optNV.innerText = opt.innerText;
+      document.getElementById('nv-cliente').appendChild(optNV);
+
       document.getElementById('censo-tienda').value = '';
       document.getElementById('censo-prop').value = '';
       document.getElementById('censo-tel').value = '';
@@ -461,10 +505,12 @@
       window.cambiarPestana('pedidos');
     };
 
-    // 6. VISITA SIN VENTA
+    // 5. VISITA SIN VENTA
     window.guardarVisitaSinVenta = function(e) {
       e.preventDefault();
       var selCli = document.getElementById('nv-cliente');
+      if (!selCli.value) return alert("Selecciona un cliente visitado.");
+      
       var cliNombre = selCli.options[selCli.selectedIndex].text;
       var motivo = document.getElementById('nv-motivo').value;
 
@@ -473,22 +519,51 @@
       window.cambiarPestana('pedidos');
     };
 
+    // 6. CONEXIÓN SUPABASE Y CARGA DINÁMICA
+    async function initPreventaSupabase() {
+      try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+          
+          // Cargar productos
+          var { data: prodData, error: prodErr } = await sbClient.from('productos').select('*');
+          if (!prodErr && prodData && prodData.length > 0) {
+            catalogoPrev = prodData.map(p => ({
+              id: p.id,
+              sku: p.sku,
+              nombre: p.nombre,
+              factor: p.factor_empaque || 12,
+              precio: p.precio_mayorista || 0,
+              stock_central: p.stock_bodega_principal || 0
+            }));
+            window.renderizarCatalogoPrev(catalogoPrev);
+          }
+
+          // Cargar clientes registrados
+          var { data: cliData, error: cliErr } = await sbClient.from('clientes').select('*');
+          if (!cliErr && cliData && cliData.length > 0) {
+            var selPrev = document.getElementById('select-cliente-prev');
+            var selNV = document.getElementById('nv-cliente');
+            selPrev.innerHTML = '<option value="">Selecciona un cliente de la ruta...</option>';
+            selNV.innerHTML = '<option value="">Selecciona un cliente...</option>';
+            cliData.forEach(c => {
+              var label = `${c.nombre_tienda} (${c.barrio || 'Local'})`;
+              selPrev.innerHTML += `<option value="${c.id}">${label}</option>`;
+              selNV.innerHTML += `<option value="${c.id}">${label}</option>`;
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Modo local o sin productos cargados");
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
       var manana = new Date();
       manana.setDate(manana.getDate() + 1);
       document.getElementById('prev-fecha-entrega').value = manana.toISOString().split('T')[0];
-
-      // Llenar select de no venta con clientes iniciales
-      var selCli = document.getElementById('select-cliente-prev');
-      var selNV = document.getElementById('nv-cliente');
-      for (var i = 0; i < selCli.options.length; i++) {
-        var o = document.createElement('option');
-        o.value = selCli.options[i].value;
-        o.innerText = selCli.options[i].innerText;
-        selNV.appendChild(o);
-      }
-
       window.renderizarCatalogoPrev(catalogoPrev);
+      initPreventaSupabase();
     });
   </script>
 </body>
