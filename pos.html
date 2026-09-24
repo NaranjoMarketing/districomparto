@@ -56,9 +56,9 @@
           <span class="text-[10px] tracking-widest text-indigo-400 font-black uppercase">GRUPO MAF</span>
           <span class="text-[10px] bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded font-bold">PUNTO DE VENTA & AUDITORÍA</span>
           
-          <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+          <div id="badge-conexion" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
             <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span>BD CONECTADA</span>
+            <span id="texto-conexion">BD CONECTADA</span>
           </div>
 
           <div id="badge-estado-caja" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
@@ -114,11 +114,11 @@
 
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
               <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-black uppercase text-slate-500 tracking-wider">Catálogo Coca-Cola FEMSA[cite: 4]</span>
+                <span class="text-xs font-black uppercase text-slate-500 tracking-wider">Catálogo de Productos</span>
                 <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Stock Bodega Central</span>
               </div>
               <div id="grid-productos-pos" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 max-h-[560px] overflow-y-auto pr-1">
-                <!-- Inyectado dinámicamente -->
+                <!-- Se llena dinámicamente desde Supabase o se muestra vacío si no hay registros -->
               </div>
             </div>
           </div>
@@ -146,10 +146,10 @@
 
               <div class="grid grid-cols-2 gap-2 pt-2">
                 <button type="button" onclick="window.abrirModalSepararCupo()" class="py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl shadow-md transition-all">
-                  Apartar (24h)[cite: 1]
+                  Apartar (24h)
                 </button>
                 <button type="button" onclick="window.abrirModalCobroPOS()" class="py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md shadow-emerald-600/30 transition-all">
-                  Cobrar y Facturar[cite: 1]
+                  Cobrar y Facturar
                 </button>
               </div>
             </div>
@@ -163,20 +163,28 @@
         <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
             <h2 class="text-lg lg:text-xl font-black text-slate-900">Liquidación Diaria de Repartidores</h2>
-            <p class="text-xs text-slate-500">Concilia remisiones y productos vendidos en calle[cite: 1].</p>
+            <p class="text-xs text-slate-500">Concilia remisiones y productos vendidos en calle.</p>
           </div>
+          <button type="button" onclick="window.cargarLiquidacionesRepartidores()" class="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-1.5">
+            <span>🔄</span> Actualizar Remisiones
+          </button>
         </div>
 
         <div id="contenedor-arqueos-repartidores" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <!-- Inyectado dinámicamente -->
+          <!-- Vacío en blanco por defecto -->
         </div>
       </section>
 
       <!-- VISTA 3: FACTURAS DEL DÍA -->
       <section id="vista-pos-facturas_dia" class="space-y-6" style="display: none;">
-        <div>
-          <h2 class="text-lg lg:text-xl font-black text-slate-900">Documentos Emitidos Hoy</h2>
-          <p class="text-xs text-slate-500">Reimprime comprobantes o consulta facturas antes del cierre diario.</p>
+        <div class="flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Documentos Emitidos Hoy</h2>
+            <p class="text-xs text-slate-500">Reimprime comprobantes o consulta facturas antes del cierre diario.</p>
+          </div>
+          <div class="w-72">
+            <input type="text" id="buscador-facturas-dia" oninput="window.filtrarFacturasDia()" placeholder="🔍 Buscar por consecutivo o cliente..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold outline-none">
+          </div>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -194,7 +202,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-facturas-dia-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Vacío en blanco por defecto -->
               </tbody>
             </table>
           </div>
@@ -205,7 +213,7 @@
       <section id="vista-pos-cierres_historial" class="space-y-6" style="display: none;">
         <div>
           <h2 class="text-lg lg:text-xl font-black text-slate-900">Historial de Cierres y Arqueos Diarios</h2>
-          <p class="text-xs text-slate-500">Informes consolidados enviados a Administración[cite: 1].</p>
+          <p class="text-xs text-slate-500">Informes consolidados enviados a Administración.</p>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -223,7 +231,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-cierres-historial-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Vacío en blanco por defecto -->
               </tbody>
             </table>
           </div>
@@ -242,7 +250,7 @@
       </div>
       <div>
         <h3 class="font-black text-xl text-slate-900">Apertura de Turno en Caja</h3>
-        <p class="text-xs text-slate-500 font-medium mt-1">Ingresa el dinero en efectivo con el que inicias el día[cite: 1].</p>
+        <p class="text-xs text-slate-500 font-medium mt-1">Ingresa el dinero en efectivo con el que inicias el día.</p>
       </div>
 
       <div class="text-left space-y-1">
@@ -256,7 +264,7 @@
     </div>
   </div>
 
-  <!-- MODAL DE CIERRE Y ARQUEO DIARIO (IDÉNTICO A LA IMAGEN) -->
+  <!-- MODAL DE CIERRE Y ARQUEO DIARIO -->
   <div id="modal-cierre-arqueo" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
     <div class="bg-white w-full max-w-3xl rounded-3xl p-6 lg:p-7 space-y-6 shadow-2xl max-h-[92vh] overflow-y-auto no-scrollbar">
       
@@ -377,8 +385,6 @@
         <label class="block text-xs font-black uppercase text-slate-600">Cliente Asignado *</label>
         <select id="modal-cliente-select" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold text-slate-800 outline-none">
           <option value="mostrador">Cliente Mostrador / Venta Rápida</option>
-          <option value="tienda-1">Tienda Don José (El Centro)</option>
-          <option value="tienda-2">Superete La Cabaña (La Primavera)</option>
         </select>
       </div>
 
@@ -398,11 +404,29 @@
       </div>
 
       <div id="bloque-efectivo-pos" class="space-y-2">
-        <label class="block text-xs font-bold text-slate-600 uppercase">Dinero Recibido (Calcula Vuelto Automático)[cite: 1]</label>
+        <label class="block text-xs font-bold text-slate-600 uppercase">Dinero Recibido (Calcula Vuelto Automático)</label>
         <input type="number" id="pos-dinero-recibido" oninput="window.calcularVueltoPOS()" placeholder="Ej: 100000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
         <div class="flex justify-between items-center text-xs font-bold bg-amber-50 p-3 rounded-xl border border-amber-200">
           <span class="text-amber-800 uppercase">Cambio / Vuelto:</span>
           <span class="text-amber-950 font-black text-xl" id="pos-texto-vuelto">$0</span>
+        </div>
+      </div>
+
+      <div id="bloque-mixto-pos" class="space-y-2" style="display: none;">
+        <label class="block text-xs font-bold text-slate-600 uppercase">Distribuir Valores Mixtos</label>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="text-[10px] font-bold text-slate-500">Efectivo</label>
+            <input type="number" id="pos-mix-efectivo" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500">Nequi</label>
+            <input type="number" id="pos-mix-nequi" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-500">Transf.</label>
+            <input type="number" id="pos-mix-transf" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl text-xs font-bold">
+          </div>
         </div>
       </div>
 
@@ -425,11 +449,16 @@
       <p class="font-bold text-sm" id="ticket-print-total">TOTAL: $0</p>
     </div>
     <div class="text-center text-[10px] mt-4 border-t pt-2">
-      <p>Creado y desarrollado por: Jr Naranjo - 322 858 6808[cite: 1]</p>
+      <p>Creado y desarrollado por: Jr Naranjo - 322 858 6808</p>
     </div>
   </div>
 
   <script>
+    const SB_URL = 'https://bmucdccdztmotyphhdgg.supabase.co';
+    const SB_KEY = 'sb_publishable_Ne0sfR_YLBpnqtrcDopJfw_jUtOlahJ';
+    var sbClient = null;
+    var isOnline = false;
+
     var posUserOficial = 'admin';
     var posPassOficial = 'comparto123';
 
@@ -447,6 +476,7 @@
       }
     };
 
+    // VARIABLES TOTALMENTE LIMPIAS (CERO DEMOS)
     var cajaAbierta = false;
     var baseCajaInicial = 0;
     var consecutivoActual = 1;
@@ -454,43 +484,12 @@
     var carritoPOS = {};
     var medioPagoPOSSeleccionado = 'efectivo';
 
-    var productosPOS = [
-      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, precio_paca: 77000, precio_unidad: 7500, stock: 700 },
-      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, precio_paca: 70000, precio_unidad: 13000, stock: 650 },
-      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, precio_paca: 34000, precio_unidad: 3500, stock: 800 },
-      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, precio_paca: 38000, precio_unidad: 4000, stock: 750 }
-    ];
-
+    var productosPOS = []; 
     var facturasDelDia = [];
     var cierresHistorial = [];
+    var liquidacionesRepartidores = [];
 
-    var liquidacionesRepartidores = [
-      {
-        id: 'liq-001',
-        movil: 'Móvil 1 - Camión NHR (ABC123)',
-        repartidor: 'Luis Martínez',
-        remisiones: [
-          { 
-            codigo: 'RM-ABC123-0001', 
-            cliente: 'Tienda Don José', 
-            total: 345000, 
-            ef: 200000, 
-            nq: 145000, 
-            tr: 0,
-            productos_detalle: [
-              { nombre: 'Coca-Cola 1.5 Lt', cant: '4 pacas', subtotal: 308000 },
-              { nombre: 'Coca-Cola Lata 330ml', cant: '1 paca', subtotal: 37000 }
-            ]
-          }
-        ],
-        total_facturado: 345000,
-        total_efectivo: 200000,
-        total_nequi: 145000,
-        total_transf: 0,
-        estado: 'pendiente'
-      }
-    ];
-
+    // 2. APERTURA DE CAJA
     window.confirmarAperturaCaja = function() {
       var base = parseFloat(document.getElementById('input-base-apertura').value);
       if (isNaN(base) || base < 0) return alert("Ingresa un monto base válido.");
@@ -502,6 +501,7 @@
       document.getElementById('badge-estado-caja').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>CAJA ABIERTA</span>`;
     };
 
+    // 3. NAVEGACIÓN
     window.cambiarVistaPOS = function(vista) {
       ['facturacion', 'arqueo', 'facturas_dia', 'cierres_historial'].forEach(function(v) {
         var sec = document.getElementById('vista-pos-' + v);
@@ -514,8 +514,11 @@
         }
       });
       if (vista === 'arqueo') window.cargarLiquidacionesRepartidores();
+      if (vista === 'facturas_dia') window.renderizarFacturasDia(facturasDelDia);
+      if (vista === 'cierres_historial') window.renderizarCierresHistorial();
     };
 
+    // 4. MODO DE VENTA
     window.setModoPresentacion = function(modo) {
       modoPresentacion = modo;
       document.getElementById('btn-modo-paca').className = (modo === 'paca') ? "px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-black" : "px-3 py-1.5 rounded-lg text-slate-600";
@@ -523,9 +526,22 @@
       window.renderizarProductosPOS(productosPOS);
     };
 
+    // 5. RENDERIZADO DEL CATÁLOGO (LIMPIO)
     window.renderizarProductosPOS = function(items) {
       var cont = document.getElementById('grid-productos-pos');
       if (!cont) return;
+      cont.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        cont.innerHTML = `
+          <div class="col-span-3 text-center py-16 text-slate-400 italic">
+            <span class="text-3xl block mb-2">📦</span>
+            No hay productos registrados en el inventario.<br>Carga el catálogo inicial desde el módulo de Administración.
+          </div>
+        `;
+        return;
+      }
+
       cont.innerHTML = items.map(prod => `
         <div onclick="window.agregarAlCarritoPOS('${prod.id}')" class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col justify-between hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer">
           <div>
@@ -536,7 +552,7 @@
             <h4 class="font-black text-xs text-slate-900 mt-1">${prod.nombre}</h4>
           </div>
           <div class="flex justify-between items-center mt-3 pt-2 border-t border-slate-200">
-            <span class="text-xs text-slate-500">Stock: <b>${prod.stock}</b></span>
+            <span class="text-xs text-slate-500">Stock: <b>${prod.stock || 0}</b></span>
             <span class="font-black text-indigo-900 text-sm">$${(modoPresentacion === 'paca' ? prod.precio_paca : prod.precio_unidad).toLocaleString()}</span>
           </div>
         </div>
@@ -545,15 +561,25 @@
 
     window.filtrarProductosPOS = function() {
       var q = (document.getElementById('pos-buscador').value || '').toLowerCase().trim();
-      var filtrados = productosPOS.filter(p => p.nombre.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+      var filtrados = productosPOS.filter(p => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
       window.renderizarProductosPOS(filtrados);
     };
 
+    // 6. CARRITO Y TICKET
     window.agregarAlCarritoPOS = function(prodId) {
-      if (!cajaAbierta) return alert("Debes abrir la caja con la base inicial.");
+      if (!cajaAbierta) return alert("Debes abrir la caja con la base inicial antes de facturar.");
       if (!carritoPOS[prodId]) carritoPOS[prodId] = { pacas: 0, unidades: 0 };
       if (modoPresentacion === 'paca') carritoPOS[prodId].pacas += 1;
       else carritoPOS[prodId].unidades += 1;
+      window.actualizarTicketPOS();
+    };
+
+    window.modificarItemTicket = function(prodId, tipo, delta) {
+      if (!carritoPOS[prodId]) return;
+      carritoPOS[prodId][tipo] += delta;
+      if (carritoPOS[prodId].pacas <= 0 && carritoPOS[prodId].unidades <= 0) {
+        delete carritoPOS[prodId];
+      }
       window.actualizarTicketPOS();
     };
 
@@ -561,16 +587,57 @@
       var cont = document.getElementById('lista-items-ticket');
       cont.innerHTML = '';
       var total = 0;
+      var tieneItems = false;
 
       Object.keys(carritoPOS).forEach(pId => {
         var prod = productosPOS.find(p => p.id === pId);
+        if (!prod) return;
         var item = carritoPOS[pId];
+
         if (item.pacas > 0) {
+          tieneItems = true;
           var subP = item.pacas * prod.precio_paca;
           total += subP;
-          cont.innerHTML += `<div class="p-2 bg-slate-50 border rounded-xl flex justify-between"><span>${item.pacas}x ${prod.nombre} (Paca)</span><span class="font-bold">$${subP.toLocaleString()}</span></div>`;
+          cont.innerHTML += `
+            <div class="p-2.5 bg-slate-50 border rounded-xl flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">${prod.nombre}</span>
+                <span class="text-[10px] text-slate-500 font-semibold">${item.pacas} pacas x $${prod.precio_paca.toLocaleString()}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="window.modificarItemTicket('${prod.id}', 'pacas', -1)" class="w-6 h-6 rounded bg-white border font-bold">-</button>
+                <span class="font-black text-indigo-950 w-5 text-center">${item.pacas}</span>
+                <button type="button" onclick="window.modificarItemTicket('${prod.id}', 'pacas', 1)" class="w-6 h-6 rounded bg-indigo-600 text-white font-bold">+</button>
+                <span class="font-black text-slate-900 ml-2 w-16 text-right">$${subP.toLocaleString()}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        if (item.unidades > 0) {
+          tieneItems = true;
+          var subU = item.unidades * prod.precio_unidad;
+          total += subU;
+          cont.innerHTML += `
+            <div class="p-2.5 bg-slate-50 border rounded-xl flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">${prod.nombre}</span>
+                <span class="text-[10px] text-emerald-700 font-semibold">${item.unidades} uds x $${prod.precio_unidad.toLocaleString()}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="window.modificarItemTicket('${prod.id}', 'unidades', -1)" class="w-6 h-6 rounded bg-white border font-bold">-</button>
+                <span class="font-black text-indigo-950 w-5 text-center">${item.unidades}</span>
+                <button type="button" onclick="window.modificarItemTicket('${prod.id}', 'unidades', 1)" class="w-6 h-6 rounded bg-indigo-600 text-white font-bold">+</button>
+                <span class="font-black text-slate-900 ml-2 w-16 text-right">$${subU.toLocaleString()}</span>
+              </div>
+            </div>
+          `;
         }
       });
+
+      if (!tieneItems) {
+        cont.innerHTML = '<p class="text-slate-400 italic py-6 text-center">No hay productos seleccionados.</p>';
+      }
 
       document.getElementById('pos-total-texto').innerText = `$${total.toLocaleString()}`;
       return total;
@@ -581,10 +648,13 @@
       window.actualizarTicketPOS();
     };
 
+    // 7. COBRO Y VUELTO
     window.abrirModalCobroPOS = function() {
       var total = window.actualizarTicketPOS();
       if (total <= 0) return alert("Agrega productos al ticket.");
       document.getElementById('modal-pos-total-pagar').innerText = `$${total.toLocaleString()}`;
+      document.getElementById('pos-dinero-recibido').value = '';
+      document.getElementById('pos-texto-vuelto').innerText = '$0';
       document.getElementById('modal-cobro-pos').style.display = 'flex';
       window.setMedioPagoPOS('efectivo');
     };
@@ -602,6 +672,7 @@
           : "py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold";
       });
       document.getElementById('bloque-efectivo-pos').style.display = (mp === 'efectivo') ? 'block' : 'none';
+      document.getElementById('bloque-mixto-pos').style.display = (mp === 'mixto') ? 'block' : 'none';
     };
 
     window.calcularVueltoPOS = function() {
@@ -611,20 +682,67 @@
       document.getElementById('pos-texto-vuelto').innerText = vuelto >= 0 ? `$${vuelto.toLocaleString()}` : '$0';
     };
 
-    window.emitirFacturaPOS = function() {
+    window.emitirFacturaPOS = async function() {
       var total = window.actualizarTicketPOS();
+      var ef = 0, nq = 0, tr = 0, vuelto = 0;
+
+      if (medioPagoPOSSeleccionado === 'efectivo') {
+        var recibido = parseFloat(document.getElementById('pos-dinero-recibido').value) || 0;
+        if (recibido < total) return alert("El dinero en efectivo recibido es menor al total.");
+        ef = total;
+        vuelto = recibido - total;
+      } else if (medioPagoPOSSeleccionado === 'nequi') {
+        nq = total;
+      } else if (medioPagoPOSSeleccionado === 'transferencia') {
+        tr = total;
+      } else if (medioPagoPOSSeleccionado === 'mixto') {
+        ef = parseFloat(document.getElementById('pos-mix-efectivo').value) || 0;
+        nq = parseFloat(document.getElementById('pos-mix-nequi').value) || 0;
+        tr = parseFloat(document.getElementById('pos-mix-transf').value) || 0;
+        if ((ef + nq + tr) !== total) return alert("Los valores mixtos no coinciden con el total.");
+      }
+
       var codigoFAC = `FAC-${String(consecutivoActual).padStart(4, '0')}`;
-      facturasDelDia.unshift({
+      var selCli = document.getElementById('modal-cliente-select');
+      var clienteNombre = selCli.options[selCli.selectedIndex].text;
+
+      var nuevaFactura = {
         codigo: codigoFAC,
         tipo: 'Mostrador',
-        cliente: 'Cliente Mostrador',
+        cliente: clienteNombre,
         total: total,
         medio: medioPagoPOSSeleccionado,
-        ef: (medioPagoPOSSeleccionado === 'efectivo') ? total : 0,
-        nq: (medioPagoPOSSeleccionado === 'nequi') ? total : 0,
-        tr: (medioPagoPOSSeleccionado === 'transferencia') ? total : 0,
+        ef: ef,
+        nq: nq,
+        tr: tr,
+        vuelto: vuelto,
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         estado: 'emitida'
-      });
+      };
+
+      facturasDelDia.unshift(nuevaFactura);
+
+      // Si está conectado a Supabase, guardar
+      if (isOnline && sbClient) {
+        try {
+          await sbClient.from('ventas').insert([{
+            tipo_documento: 'factura_mostrador',
+            prefijo: 'FAC',
+            consecutivo: consecutivoActual,
+            codigo_completo: codigoFAC,
+            total: total,
+            subtotal: total,
+            forma_pago: medioPagoPOSSeleccionado,
+            pago_efectivo: ef,
+            pago_nequi: nq,
+            pago_transferencia: tr,
+            vuelto_entregado: vuelto,
+            estado: 'emitida'
+          }]);
+        } catch (e) {
+          console.warn("No se pudo guardar en BD:", e);
+        }
+      }
 
       consecutivoActual++;
       document.getElementById('label-consecutivo-actual').innerText = `FAC-${String(consecutivoActual).padStart(4, '0')}`;
@@ -635,8 +753,23 @@
       alert(`¡Factura ${codigoFAC} generada con éxito!`);
     };
 
+    // 8. LIQUIDACIONES DE REPARTIDORES (VACÍO EN BLANCO)
     window.cargarLiquidacionesRepartidores = function() {
       var cont = document.getElementById('contenedor-arqueos-repartidores');
+      if (!cont) return;
+      cont.innerHTML = '';
+
+      if (!liquidacionesRepartidores || liquidacionesRepartidores.length === 0) {
+        cont.innerHTML = `
+          <div class="col-span-2 text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-2">
+            <span class="text-4xl block">🚚</span>
+            <p class="text-sm font-black text-slate-700">No hay remisiones de repartidores pendientes por liquidar</p>
+            <p class="text-xs text-slate-400">Cuando un camión cierre su jornada en ruta, sus cobros aparecerán aquí para el cuadre.</p>
+          </div>
+        `;
+        return;
+      }
+
       cont.innerHTML = liquidacionesRepartidores.map(liq => `
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex justify-between items-start border-b pb-3">
@@ -651,12 +784,12 @@
 
           <div class="space-y-2">
             <span class="text-xs font-black uppercase text-slate-600">Detalle de Productos Vendidos:</span>
-            ${liq.remisiones.map(r => `
+            ${(liq.remisiones || []).map(r => `
               <div class="p-3 bg-slate-50 border rounded-xl text-xs space-y-1">
                 <div class="flex justify-between font-black">
                   <span>${r.codigo} - ${r.cliente}</span>                   <span>$${r.total.toLocaleString()}</span>
                 </div>
-                ${r.productos_detalle.map(d => `<div class="flex justify-between text-slate-500"><span>• ${d.nombre} (${d.cant})</span><span>$${d.subtotal.toLocaleString()}</span></div>`).join('')}
+                ${(r.productos_detalle || []).map(d => `<div class="flex justify-between text-slate-500"><span>• ${d.nombre} (${d.cant})</span><span>$${d.subtotal.toLocaleString()}</span></div>`).join('')}
               </div>
             `).join('')}
           </div>
@@ -668,16 +801,25 @@
       `).join('');
     };
 
+    // 9. CIERRE Y ARQUEO DIARIO
     window.abrirModalCierreDiario = function() {
       if (!cajaAbierta) return alert("La caja aún está cerrada.");
       var ventasEf = facturasDelDia.reduce((a, b) => a + b.ef, 0);
-      var efRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + b.total_efectivo, 0);
-      var nqRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + b.total_nequi, 0);
+      var efRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + (b.total_efectivo || 0), 0);
+      var nqRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + (b.total_nequi || 0), 0);
+      var trRep = liquidacionesRepartidores.filter(l => l.estado === 'cuadrado').reduce((a, b) => a + (b.total_transf || 0), 0);
 
       document.getElementById('arq-base-caja').innerText = `$${baseCajaInicial.toLocaleString()}`;
       document.getElementById('arq-ventas-efectivo').innerText = `$${(ventasEf + efRep).toLocaleString()}`;
       document.getElementById('arq-efectivo-esperado').innerText = `$${(baseCajaInicial + ventasEf + efRep).toLocaleString()}`;
       document.getElementById('arq-nequi-esperado').innerText = `$${nqRep.toLocaleString()}`;
+      document.getElementById('arq-transf-esperado').innerText = `$${trRep.toLocaleString()}`;
+      
+      document.getElementById('arq-input-efectivo-real').value = '';
+      document.getElementById('arq-input-transf-real').value = '';
+      document.getElementById('arq-input-nequi-real').value = '';
+      window.recalcularDiferenciasArqueo();
+
       document.getElementById('modal-cierre-arqueo').style.display = 'flex';
     };
 
@@ -687,28 +829,179 @@
 
     window.recalcularDiferenciasArqueo = function() {
       var efEsp = parseFloat(document.getElementById('arq-efectivo-esperado').innerText.replace(/\$|\./g, '')) || 0;
+      var trEsp = parseFloat(document.getElementById('arq-transf-esperado').innerText.replace(/\$|\./g, '')) || 0;
+      var nqEsp = parseFloat(document.getElementById('arq-nequi-esperado').innerText.replace(/\$|\./g, '')) || 0;
+
       var efReal = parseFloat(document.getElementById('arq-input-efectivo-real').value);
-      var diff = isNaN(efReal) ? -efEsp : (efReal - efEsp);
-      var lbl = document.getElementById('arq-diff-efectivo');
-      if (diff === 0) { lbl.innerText = "Cuadrado ($0)"; lbl.className = "font-black text-emerald-600"; }
-      else if (diff < 0) { lbl.innerText = `Falta -$${Math.abs(diff).toLocaleString()}`; lbl.className = "font-black text-rose-600"; }
-      else { lbl.innerText = `Sobra +$${diff.toLocaleString()}`; lbl.className = "font-black text-blue-600"; }
+      var trReal = parseFloat(document.getElementById('arq-input-transf-real').value);
+      var nqReal = parseFloat(document.getElementById('arq-input-nequi-real').value);
+
+      var diffEf = isNaN(efReal) ? -efEsp : (efReal - efEsp);
+      var lblEf = document.getElementById('arq-diff-efectivo');
+      if (diffEf === 0) { lblEf.innerText = "Cuadrado ($0)"; lblEf.className = "font-black text-emerald-600"; }
+      else if (diffEf < 0) { lblEf.innerText = `Falta -$${Math.abs(diffEf).toLocaleString()}`; lblEf.className = "font-black text-rose-600"; }
+      else { lblEf.innerText = `Sobra +$${diffEf.toLocaleString()}`; lblEf.className = "font-black text-blue-600"; }
+
+      var diffTr = isNaN(trReal) ? -trEsp : (trReal - trEsp);
+      var lblTr = document.getElementById('arq-diff-transf');
+      if (diffTr === 0) { lblTr.innerText = "Cuadrado ($0)"; lblTr.className = "font-black text-emerald-600"; }
+      else if (diffTr < 0) { lblTr.innerText = `Falta -$${Math.abs(diffTr).toLocaleString()}`; lblTr.className = "font-black text-rose-600"; }
+      else { lblTr.innerText = `Sobra +$${diffTr.toLocaleString()}`; lblTr.className = "font-black text-blue-600"; }
+
+      var diffNq = isNaN(nqReal) ? -nqEsp : (nqReal - nqEsp);
+      var lblNq = document.getElementById('arq-diff-nequi');
+      if (diffNq === 0) { lblNq.innerText = "Cuadrado ($0)"; lblNq.className = "font-black text-emerald-600"; }
+      else if (diffNq < 0) { lblNq.innerText = `Falta -$${Math.abs(diffNq).toLocaleString()}`; lblNq.className = "font-black text-rose-600"; }
+      else { lblNq.innerText = `Sobra +$${diffNq.toLocaleString()}`; lblNq.className = "font-black text-blue-600"; }
+
+      var totalDiff = diffEf + diffTr + diffNq;
+      var banner = document.getElementById('banner-diferencia-consolidada');
+      if (totalDiff === 0) {
+        banner.className = "p-4 rounded-2xl text-center font-black text-base bg-emerald-50 text-emerald-800 border border-emerald-200";
+        banner.innerText = "Diferencia Consolidada de Caja: $0 (Cuadrado)";
+      } else if (totalDiff < 0) {
+        banner.className = "p-4 rounded-2xl text-center font-black text-base bg-rose-50 text-rose-700 border border-rose-200";
+        banner.innerText = `Diferencia Consolidada de Caja: -$${Math.abs(totalDiff).toLocaleString()} (Faltante)`;
+      } else {
+        banner.className = "p-4 rounded-2xl text-center font-black text-base bg-blue-50 text-blue-800 border border-blue-200";
+        banner.innerText = `Diferencia Consolidada de Caja: +$${totalDiff.toLocaleString()} (Sobrante)`;
+      }
     };
 
     window.confirmarCierreTurnoEImprimir = function() {
-      alert("Turno cerrado con éxito. Informe transmitido al administrador[cite: 1].");
+      var efReal = parseFloat(document.getElementById('arq-input-efectivo-real').value) || 0;
+      var trReal = parseFloat(document.getElementById('arq-input-transf-real').value) || 0;
+      var nqReal = parseFloat(document.getElementById('arq-input-nequi-real').value) || 0;
+
+      cierresHistorial.unshift({
+        fecha: new Date().toLocaleString(),
+        base: baseCajaInicial,
+        efectivo_real: efReal,
+        nequi_real: nqReal,
+        transf_real: trReal,
+        diferencia: document.getElementById('banner-diferencia-consolidada').innerText,
+        estado: 'auditado'
+      });
+
+      alert("Turno cerrado con éxito. Informe transmitido al administrador.");
       cajaAbierta = false;
+      document.getElementById('badge-estado-caja').className = "flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40";
       document.getElementById('badge-estado-caja').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span><span>CAJA CERRADA</span>`;
       window.cerrarModalCierreDiario();
+      window.cambiarVistaPOS('cierres_historial');
     };
 
     window.abrirModalSepararCupo = function() {
-      alert("Cupo en efectivo separado por 24 horas[cite: 1].");
+      var total = window.actualizarTicketPOS();
+      if (total <= 0) return alert("Agrega productos al ticket.");
+      alert(`Cupo en efectivo separado por 24 horas. Monto: $${total.toLocaleString()}`);
       window.limpiarCarritoPOS();
     };
 
+    // 10. FACTURAS DEL DÍA
+    window.renderizarFacturasDia = function(items) {
+      var tbody = document.getElementById('tabla-facturas-dia-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 italic">No se han emitido facturas en este turno.</td></tr>';
+        return;
+      }
+
+      items.forEach(function(f, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono font-bold text-slate-900">${f.codigo}</td>
+          <td class="p-3.5"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-black text-[10px] uppercase">${f.tipo}</span></td>
+          <td class="p-3.5 font-bold">${f.cliente}</td>
+          <td class="p-3.5 uppercase font-semibold text-[11px]">${f.medio}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${f.total.toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${f.estado === 'anulada' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${f.estado === 'anulada' ? 'Anulada' : 'Vigente'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            <button type="button" onclick="window.reimprimirFactura(${idx})" class="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-700" title="Reimprimir">🖨️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.filtrarFacturasDia = function() {
+      var q = (document.getElementById('buscador-facturas-dia').value || '').toLowerCase().trim();
+      var filtradas = facturasDelDia.filter(f => f.codigo.toLowerCase().includes(q) || f.cliente.toLowerCase().includes(q));
+      window.renderizarFacturasDia(filtradas);
+    };
+
+    window.reimprimirFactura = function(idx) {
+      var f = facturasDelDia[idx];
+      if (!f) return;
+      document.getElementById('ticket-print-numero').innerText = f.codigo;
+      document.getElementById('ticket-print-fecha').innerText = `Fecha: ${f.fecha}`;
+      document.getElementById('ticket-print-total').innerText = `TOTAL: $${f.total.toLocaleString()}`;
+      window.print();
+    };
+
+    // 11. HISTORIAL DE CIERRES
+    window.renderizarCierresHistorial = function() {
+      var tbody = document.getElementById('tabla-cierres-historial-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!cierresHistorial || cierresHistorial.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400 italic">No hay cierres registrados aún.</td></tr>';
+        return;
+      }
+
+      cierresHistorial.forEach(function(c) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold text-slate-900">${c.fecha}</td>
+          <td class="p-3.5 text-right font-semibold">$${c.base.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${c.efectivo_real.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-purple-900">$${c.nequi_real.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-black text-blue-900">$${c.transf_real.toLocaleString()}</td>
+          <td class="p-3.5 text-right font-bold text-xs">${c.diferencia}</td>
+          <td class="p-3.5 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">Transmitido a Admin</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // 12. CONEXIÓN SEGURA Y CARGA DE PRODUCTOS DESDE SUPABASE
+    async function initPOSSupabase() {
+      try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+          var { data, error } = await sbClient.from('productos').select('*');
+          if (!error && data && data.length > 0) {
+            isOnline = true;
+            // Adaptar productos de Supabase al formato POS
+            productosPOS = data.map(p => ({
+              id: p.id,
+              sku: p.sku,
+              nombre: p.nombre,
+              factor: p.factor_empaque || 12,
+              precio_paca: p.precio_mayorista || 0,
+              precio_unidad: Math.round((p.precio_mayorista || 0) / (p.factor_empaque || 12) * 1.15),
+              stock: p.stock_bodega_principal || 0
+            }));
+            window.renderizarProductosPOS(productosPOS);
+          }
+        }
+      } catch (err) {
+        console.warn("Modo local o sin productos cargados");
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
       window.renderizarProductosPOS(productosPOS);
+      initPOSSupabase();
     });
   </script>
 </body>
