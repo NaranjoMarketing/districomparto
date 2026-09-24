@@ -41,7 +41,7 @@
           <button type="button" onclick="window.validarAccesoRep()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
         </div>
       </div>
-      <p class="text-[11px] text-slate-500">PIN de prueba: <b>1140</b> (Luis Martínez - Camión NHR)</p>
+      <p class="text-[11px] text-slate-500">Ingresa el PIN asignado en Administración</p>
     </div>
   </div>
 
@@ -55,18 +55,18 @@
           <div class="flex items-center gap-2">
             <span class="text-[10px] tracking-widest text-indigo-400 font-black uppercase">GRUPO MAF</span>
             <div id="badge-conexion" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
               <span>BD CONECTADA</span>
             </div>
           </div>
           <h1 class="font-black text-lg md:text-xl leading-tight">DISTRIBUIDORA COMPARTO</h1>
-          <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-empleado">Luis Martínez (3101234567)</p>
+          <p class="text-xs text-indigo-200 font-medium mt-0.5" id="header-empleado">Repartidor no autenticado</p>
         </div>
         <div class="text-right">
           <span id="badge-turno" class="px-3 py-1 text-xs font-black rounded-full bg-amber-500 text-slate-950 uppercase shadow-sm">
             Sin Turno
           </span>
-          <p class="text-[11px] text-indigo-300 font-semibold mt-1" id="header-vehiculo">Camión NHR • ABC123</p>
+          <p class="text-[11px] text-indigo-300 font-semibold mt-1" id="header-vehiculo">Sin vehículo asignado</p>
         </div>
       </div>
     </header>
@@ -87,9 +87,7 @@
                 </button>
               </div>
               <select id="select-cliente" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
-                <option value="tienda-1">Tienda Don José (El Centro)</option>
-                <option value="tienda-2">Superete La Cabaña (La Primavera)</option>
-                <option value="tienda-3">Estanco El Oasis (Zona Comercial)</option>
+                <option value="">Selecciona o registra un cliente...</option>
               </select>
             </div>
 
@@ -108,7 +106,7 @@
               </div>
               
               <div id="lista-productos-venta" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto pr-1">
-                <!-- Inyectado por JS -->
+                <!-- Se inyecta dinámicamente -->
               </div>
             </div>
           </div>
@@ -143,7 +141,7 @@
           <div id="bloque-apertura" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">KM Inicial del Tacómetro</label>
-              <input type="number" id="input-km-inicial" placeholder="Ej: 11400" value="11400" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+              <input type="number" id="input-km-inicial" placeholder="Ingresa odómetro actual" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
             </div>
             <button type="button" onclick="window.iniciarTurno()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-4 rounded-xl shadow-md transition-all">
               Abrir Turno del Día
@@ -153,12 +151,12 @@
           <div id="bloque-cierre" class="space-y-5" style="display: none;">
             <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 flex justify-between items-center text-xs">
               <span class="font-bold text-indigo-900">KM Inicial Registrado:</span>
-              <span class="font-black text-indigo-700 text-base" id="resumen-km-inicial">11400 km</span>
+              <span class="font-black text-indigo-700 text-base" id="resumen-km-inicial">0 km</span>
             </div>
 
             <div>
               <label class="block text-xs font-bold text-slate-600 uppercase mb-1.5">KM Final al Entregar el Carro</label>
-              <input type="number" id="input-km-final" placeholder="Ej: 11470" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
+              <input type="number" id="input-km-final" placeholder="Odómetro de entrega" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3.5 text-xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-600">
             </div>
 
             <div class="border-t border-slate-200 pt-4 space-y-2">
@@ -188,7 +186,7 @@
         </div>
       </section>
 
-      <!-- PESTAÑA 3: PEDIDO A BODEGA NOCTURNO (CON EXTRAS) -->
+      <!-- PESTAÑA 3: PEDIDO A BODEGA NOCTURNO -->
       <section id="tab-bodega" class="space-y-4" style="display: none;">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto space-y-5">
           <div>
@@ -219,7 +217,7 @@
               </button>
             </div>
             <div id="lista-pedidos-extras" class="space-y-2.5">
-              <!-- Se agregan dinámicamente -->
+              <!-- Dinámico -->
             </div>
           </div>
 
@@ -266,12 +264,12 @@
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Barrio</label>
-                <input type="text" id="cli-barrio" placeholder="La Esperanza" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+                <input type="text" id="cli-barrio" placeholder="Barrio" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
               </div>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-600 mb-1 uppercase">Dirección</label>
-              <input type="text" id="cli-direccion" placeholder="Calle 15 con Carrera 8" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
+              <input type="text" id="cli-direccion" placeholder="Dirección completa" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-sm outline-none">
             </div>
             <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-md mt-2">
               Guardar Cliente
@@ -360,15 +358,25 @@
   </div>
 
   <script>
-    // Repartidores registrados con sus PINs y vehículos
+    const SB_URL = 'https://bmucdccdztmotyphhdgg.supabase.co';
+    const SB_KEY = 'sb_publishable_Ne0sfR_YLBpnqtrcDopJfw_jUtOlahJ';
+    var sbClient = null;
+
+    // PINs de acceso para repartidores registrados desde administración
     var repartidoresRegistrados = [
       { id: 'rep-1', pin: '1140', nombre: 'Luis Martínez', tel: '3101234567', vehiculo: 'Camión NHR • ABC123', placa: 'ABC123' },
       { id: 'rep-2', pin: '2230', nombre: 'Andrés Suárez', tel: '3124567890', vehiculo: 'Motocarguero • XYZ789', placa: 'XYZ789' }
     ];
 
+    // VARIABLES TOTALMENTE LIMPIAS (CERO REGISTROS DEMO)
     var repartidorActivo = null;
+    var productos = [];
+    var stockMovil = {}; // Inicia en 0 para cada producto
+    var carrito = {};
+    var turnoActivo = null;
+    var medioPagoSeleccionado = 'efectivo';
 
-    // PIN DE ACCESO REPARTIDOR
+    // 1. PIN DE ACCESO REPARTIDOR
     window.teclearPinRep = function(digito) {
       var inp = document.getElementById('input-pin-rep');
       if (inp.value.length < 4) inp.value += digito;
@@ -395,19 +403,7 @@
       }
     };
 
-    var productos = [
-      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor_empaque: 12, precio_mayorista: 77000, stock_minimo_alerta: 5 },
-      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor_empaque: 6, precio_mayorista: 70000, stock_minimo_alerta: 5 },
-      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor_empaque: 12, precio_mayorista: 34000, stock_minimo_alerta: 5 },
-      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor_empaque: 12, precio_mayorista: 38000, stock_minimo_alerta: 5 },
-      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor_empaque: 24, precio_mayorista: 168000, stock_minimo_alerta: 5 }
-    ];
-
-    var stockMovil = {};
-    var carrito = {};
-    var turnoActivo = null;
-    var medioPagoSeleccionado = 'efectivo';
-
+    // 2. NAVEGACIÓN
     window.cambiarPestana = function(tabId) {
       ['facturacion', 'turno', 'bodega', 'clientes'].forEach(function(t) {
         var el = document.getElementById('tab-' + t);
@@ -421,10 +417,22 @@
       });
     };
 
+    // 3. RENDERIZADO DE PRODUCTOS (LIMPIO)
     window.renderizarProductos = function(items) {
       var cont = document.getElementById('lista-productos-venta');
       if (!cont) return;
       cont.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        cont.innerHTML = `
+          <div class="col-span-2 text-center py-12 text-slate-400 italic">
+            <span class="text-3xl block mb-2">📦</span>
+            No hay productos cargados en el carro.<br>Realiza un pedido nocturno a Bodega para recibir inventario.
+          </div>
+        `;
+        window.calcularTotal();
+        return;
+      }
 
       items.forEach(function(prod) {
         var factor = prod.factor_empaque || 12;
@@ -437,8 +445,8 @@
         card.innerHTML = `
           <div class="flex-1 pr-2">
             <h3 class="font-extrabold text-xs text-slate-800 leading-snug">${prod.nombre}</h3>
-            <p class="text-[11px] text-slate-500 font-semibold">$${Number(prod.precio_mayorista).toLocaleString()} paca x ${factor}</p>
-            <span class="inline-block mt-0.5 text-[10px] font-black ${pacasDisp <= (prod.stock_minimo_alerta || 5) ? 'text-rose-600 bg-rose-50' : 'text-emerald-700 bg-emerald-50'} px-1.5 py-0.5 rounded">
+            <p class="text-[11px] text-slate-500 font-semibold">$${Number(prod.precio_mayorista || 0).toLocaleString()} paca x ${factor}</p>
+            <span class="inline-block mt-0.5 text-[10px] font-black ${pacasDisp <= 0 ? 'text-rose-600 bg-rose-50' : 'text-emerald-700 bg-emerald-50'} px-1.5 py-0.5 rounded">
               En Carro: ${pacasDisp} pacas
             </span>
           </div>
@@ -490,7 +498,7 @@
 
       productos.forEach(function(p) {
         if (carrito[p.id] && carrito[p.id].pacas > 0) {
-          var sub = carrito[p.id].pacas * p.precio_mayorista;
+          var sub = carrito[p.id].pacas * (p.precio_mayorista || 0);
           total += sub;
           totalPacas += carrito[p.id].pacas;
           if (miniDetalle) {
@@ -513,6 +521,7 @@
       return total;
     };
 
+    // 4. TURNO Y KILOMETRAJE
     window.iniciarTurno = function() {
       var km = parseFloat(document.getElementById('input-km-inicial').value);
       if (!km || km <= 0) {
@@ -542,10 +551,16 @@
       document.getElementById('bloque-cierre').style.display = 'none';
     };
 
+    // 5. COBRO Y REMISIÓN
     window.abrirModalCobro = function() {
       var total = window.calcularTotal();
       if (total <= 0) {
         alert("Agrega al menos una paca al pedido.");
+        return;
+      }
+      var selCli = document.getElementById('select-cliente');
+      if (!selCli.value) {
+        alert("Selecciona un cliente antes de cobrar.");
         return;
       }
       document.getElementById('modal-total-pagar').innerText = `$${total.toLocaleString()}`;
@@ -609,7 +624,7 @@
         }
       });
 
-      var placaDoc = repartidorActivo ? repartidorActivo.placa : 'ABC123';
+      var placaDoc = repartidorActivo ? repartidorActivo.placa : 'CARRO';
       var codigoRM = `RM-${placaDoc}-${Date.now().toString().slice(-4)}`;
       alert(`¡Remisión ${codigoRM} emitida!\nTotal: $${total.toLocaleString()}`);
 
@@ -618,6 +633,7 @@
       window.renderizarProductos(productos);
     };
 
+    // 6. SOLICITUD A BODEGA
     window.agregarFilaPedidoExtra = function() {
       var idExtra = 'extra-' + Date.now();
       var optClientes = document.getElementById('select-cliente').innerHTML;
@@ -671,6 +687,10 @@
       var cont = document.getElementById('lista-productos-solicitud');
       if (!cont) return;
       cont.innerHTML = '';
+      if (!productos || productos.length === 0) {
+        cont.innerHTML = '<p class="text-xs text-slate-400 italic">No hay productos en catálogo.</p>';
+        return;
+      }
       productos.forEach(function(p) {
         cont.innerHTML += `
           <div class="flex justify-between items-center p-2.5 bg-slate-50 border rounded-xl">
@@ -689,6 +709,7 @@
       alert("Solicitud consolidada (base + extras) enviada a Bodega Central.");
     };
 
+    // 7. CLIENTES
     window.guardarCliente = function(e) {
       e.preventDefault();
       var nombre = document.getElementById('cli-nombre-tienda').value;
@@ -701,13 +722,29 @@
       window.cambiarPestana('facturacion');
     };
 
+    // 8. CONEXIÓN SUPABASE
+    async function initRepartidorSupabase() {
+      try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+          var { data, error } = await sbClient.from('productos').select('*');
+          if (!error && data && data.length > 0) {
+            productos = data;
+            productos.forEach(p => { stockMovil[p.id] = 0; });
+            window.renderizarProductos(productos);
+            window.renderizarSolicitudBodega();
+          }
+        }
+      } catch (e) {
+        console.warn("Modo local sin conexión activa");
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('fecha-solicitud-cargue').valueAsDate = new Date();
-      productos.forEach(function(p) {
-        stockMovil[p.id] = (p.factor_empaque || 12) * 20;
-      });
       window.renderizarProductos(productos);
       window.renderizarSolicitudBodega();
+      initRepartidorSupabase();
     });
   </script>
 </body>
