@@ -14,7 +14,7 @@
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex justify-center items-start lg:p-4">
 
-  <!-- PANTALLA DE ACCESO POR PIN DE BODEGA (PIN: 9999) -->
+  <!-- PANTALLA DE ACCESO POR PIN DE BODEGA -->
   <div id="pantalla-login-bodega" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-3xl p-6 text-center space-y-6 shadow-2xl">
       <div>
@@ -41,7 +41,7 @@
           <button type="button" onclick="window.validarAccesoBodega()" class="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm active:scale-95">Entrar</button>
         </div>
       </div>
-      <p class="text-[11px] text-slate-500">PIN predeterminado: <b>9999</b></p>
+      <p class="text-[11px] text-slate-500">PIN: <b>9999</b></p>
     </div>
   </div>
 
@@ -77,11 +77,12 @@
 
     <main class="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar">
 
+      <!-- BANDEJA DE SOLICITUDES -->
       <section id="vista-despacho" class="space-y-6">
         <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
             <h2 class="text-lg lg:text-xl font-black text-slate-900">Bandeja de Despacho a Vehículos</h2>
-            <p class="text-xs text-slate-500">Carga al camión con 1 solo clic y traslada el inventario sin papel[cite: 1].</p>
+            <p class="text-xs text-slate-500">Los pedidos nocturnos enviados por los repartidores aparecerán aquí en tiempo real.</p>
           </div>
           <button type="button" onclick="window.cargarSolicitudes()" class="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 shadow-sm flex items-center gap-1.5">
             <span>🔄</span> Actualizar Bandeja
@@ -89,15 +90,16 @@
         </div>
 
         <div id="contenedor-solicitudes" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <!-- Inyectado dinámicamente -->
+          <!-- Vacío en blanco por defecto -->
         </div>
       </section>
 
+      <!-- STOCK CENTRAL -->
       <section id="vista-stock" class="space-y-6" style="display: none;">
         <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
             <h2 class="text-lg lg:text-xl font-black text-slate-900">Inventario Bodega Principal</h2>
-            <p class="text-xs text-slate-500">Existencias físicas de Coca-Cola FEMSA[cite: 4].</p>
+            <p class="text-xs text-slate-500">Existencias físicas en Bodega Central.</p>
           </div>
           <div class="w-full sm:w-80 relative">
             <input type="text" id="buscador-stock-central" oninput="window.filtrarStockCentral()" placeholder="🔍 Buscar por producto o presentación..." class="w-full bg-white border border-slate-300 rounded-xl py-2.5 pl-3 pr-8 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-emerald-600 shadow-sm">
@@ -118,23 +120,24 @@
                 </tr>
               </thead>
               <tbody id="tabla-stock-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Se llena desde la BD o Excel cargado -->
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
+      <!-- RETORNOS Y CIERRE -->
       <section id="vista-devoluciones" class="space-y-6" style="display: none;">
         <div class="max-w-2xl mx-auto bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h2 class="text-lg font-black text-slate-900">Recepción de Sobrantes de Ruta</h2>
-          <p class="text-xs text-slate-500">Reingresa a la Bodega Central las pacas no vendidas[cite: 1].</p>
+          <p class="text-xs text-slate-500">Reingresa a la Bodega Central las pacas no vendidas al cierre del día.</p>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Vehículo / Móvil</label>
               <select id="retorno-vehiculo" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 outline-none">
-                <option value="ABC123">Camión NHR • ABC123 (Luis Martínez)</option>
+                <option value="">Selecciona vehículo en ruta...</option>
               </select>
             </div>
             <div>
@@ -196,33 +199,9 @@
       }
     };
 
-    var catalogo = [
-      { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 700 },
-      { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor_empaque: 6, stock_minimo: 50, stock_pacas: 650 },
-      { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 800 },
-      { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor_empaque: 12, stock_minimo: 50, stock_pacas: 750 },
-      { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor_empaque: 24, stock_minimo: 50, stock_pacas: 600 }
-    ];
-
-    var solicitudes = [
-      {
-        id: 'sol-001',
-        consecutivo: 'SOL-ABC123-0891',
-        repartidor: 'Luis Martínez',
-        vehiculo: 'Camión NHR (ABC123)',
-        fecha: 'Mañana (06:00 AM)',
-        estado: 'pendiente',
-        items_base: [
-          { nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', pacas: 40 },
-          { nombre: 'Coca-Cola Lata 330 ml', pacas: 15 }
-        ],
-        items_extras: [
-          { cliente: 'Superete La Cabaña', producto: 'Monster Violet 473 ml', pacas: 5, nota: 'Entrega prioritaria' }
-        ],
-        total_pacas: 60
-      }
-    ];
-
+    // VARIABLES TOTALMENTE LIMPIAS (SIN DATOS DEMO)
+    var catalogo = [];
+    var solicitudes = [];
     var retornosLista = [];
 
     window.cambiarPestana = function(pestanaId) {
@@ -243,6 +222,17 @@
       if (!cont) return;
       cont.innerHTML = '';
 
+      if (!solicitudes || solicitudes.length === 0) {
+        cont.innerHTML = `
+          <div class="col-span-2 text-center py-16 bg-white rounded-3xl border border-slate-200 space-y-2">
+            <span class="text-4xl block">📭</span>
+            <p class="text-sm font-black text-slate-700">No hay solicitudes pendientes en bandeja</p>
+            <p class="text-xs text-slate-400">Las peticiones nocturnas que envíen los repartidores aparecerán aquí automáticamente.</p>
+          </div>
+        `;
+        return;
+      }
+
       solicitudes.forEach(function(sol) {
         var card = document.createElement('div');
         card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4";
@@ -261,11 +251,11 @@
           <div class="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl text-center">
             <div>
               <span class="text-[10px] text-slate-400 font-black uppercase block">Base</span>
-              <span class="text-sm font-black text-slate-800">${sol.items_base.reduce((a,b) => a + b.pacas, 0)} pacas</span>
+              <span class="text-sm font-black text-slate-800">${(sol.items_base || []).reduce((a,b) => a + b.pacas, 0)} pacas</span>
             </div>
             <div>
               <span class="text-[10px] text-amber-600 font-black uppercase block">Extras</span>
-              <span class="text-sm font-black text-amber-700">${sol.items_extras.reduce((a,b) => a + b.pacas, 0)} pacas</span>
+              <span class="text-sm font-black text-amber-700">${(sol.items_extras || []).reduce((a,b) => a + b.pacas, 0)} pacas</span>
             </div>
             <div>
               <span class="text-[10px] text-indigo-600 font-black uppercase block">Total</span>
@@ -285,18 +275,22 @@
       var sol = solicitudes.find(s => s.id === solId);
       if (!sol) return;
 
-      sol.items_base.forEach(b => {
-        var prod = catalogo.find(p => p.nombre.includes(b.nombre.split(' ')[0]));
-        if (prod) prod.stock_pacas -= b.pacas;
-      });
+      if (sol.items_base) {
+        sol.items_base.forEach(b => {
+          var prod = catalogo.find(p => p.nombre.includes(b.nombre.split(' ')[0]));
+          if (prod) prod.stock_pacas -= b.pacas;
+        });
+      }
 
-      sol.items_extras.forEach(e => {
-        var prod = catalogo.find(p => p.nombre.includes(e.producto.split(' ')[0]));
-        if (prod) prod.stock_pacas -= e.pacas;
-      });
+      if (sol.items_extras) {
+        sol.items_extras.forEach(e => {
+          var prod = catalogo.find(p => p.nombre.includes(e.producto.split(' ')[0]));
+          if (prod) prod.stock_pacas -= e.pacas;
+        });
+      }
 
       sol.estado = 'cargado';
-      alert(`¡Cargue exitoso!\n${sol.total_pacas} pacas transferidas automáticamente de Bodega Central al vehículo ${sol.vehiculo}[cite: 1].`);
+      alert(`¡Cargue exitoso!\n${sol.total_pacas} pacas transferidas automáticamente de Bodega Central al vehículo ${sol.vehiculo}.`);
       window.cargarSolicitudes();
       window.renderizarStockCentral(catalogo);
     };
@@ -305,6 +299,11 @@
       var tbody = document.getElementById('tabla-stock-body');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">No hay productos en bodega. Carga el catálogo inicial desde Administración.</td></tr>`;
+        return;
+      }
 
       items.forEach(function(item) {
         var totalUds = item.stock_pacas * item.factor_empaque;
@@ -336,6 +335,7 @@
 
     window.agregarFilaRetorno = function() {
       var prodSelect = document.getElementById('retorno-producto');
+      if (!prodSelect || !prodSelect.value) return alert("Selecciona un producto.");
       var pacasInp = document.getElementById('retorno-pacas');
       var cant = parseInt(pacasInp.value) || 0;
       if (cant <= 0) return alert("Ingresa pacas válidas.");
@@ -347,12 +347,19 @@
 
     window.renderizarListaRetornos = function() {
       var cont = document.getElementById('lista-retornos-items');
+      if (!retornosLista || retornosLista.length === 0) {
+        cont.innerHTML = '<p class="text-xs text-slate-400 italic">No hay productos en lista.</p>';
+        return;
+      }
       cont.innerHTML = retornosLista.map((r, idx) => `
         <div class="flex justify-between items-center p-2.5 bg-slate-50 border rounded-xl text-xs">
           <span class="font-bold text-slate-700">${r.nombre}</span>
-          <span class="font-black text-indigo-900">${r.pacas} pacas</span>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-indigo-900">${r.pacas} pacas</span>
+            <button type="button" onclick="retornosLista.splice(${idx},1); window.renderizarListaRetornos();" class="text-rose-500 font-bold">✕</button>
+          </div>
         </div>
-      `).join('') || '<p class="text-xs text-slate-400 italic">No hay productos en lista.</p>';
+      `).join('');
     };
 
     window.procesarRetornoCentral = function() {
@@ -370,8 +377,6 @@
 
     window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('retorno-fecha').valueAsDate = new Date();
-      var sel = document.getElementById('retorno-producto');
-      catalogo.forEach(p => { sel.innerHTML += `<option value="${p.id}">${p.nombre}</option>`; });
       window.cargarSolicitudes();
       window.renderizarStockCentral(catalogo);
     });
