@@ -84,7 +84,7 @@
           👥 Clientes & Crédito
         </button>
         <button type="button" onclick="window.cambiarSeccion('equipo')" id="btn-nav-equipo" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
-          🚚 Empleados & Flota
+          🚚 Empleados, Flota & Ventas
         </button>
         <button type="button" onclick="window.cambiarSeccion('gastos')" id="btn-nav-gastos" class="px-3.5 py-2 rounded-xl font-bold text-slate-400 hover:text-white transition-all">
           💸 Gastos Fijos
@@ -253,7 +253,7 @@
                   </tr>
                 </thead>
                 <tbody id="tabla-admin-productos-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                  <!-- Inyectado por JS -->
+                  <!-- Inicia totalmente limpio -->
                 </tbody>
               </table>
             </div>
@@ -289,7 +289,7 @@
                   </tr>
                 </thead>
                 <tbody id="tabla-inv-inicial-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                  <!-- Inyectado por JS -->
+                  <!-- Inicia totalmente limpio -->
                 </tbody>
               </table>
             </div>
@@ -305,8 +305,6 @@
             </div>
 
             <form onsubmit="window.procesarFacturaCompraMasiva(event)" class="space-y-5 text-xs">
-              
-              <!-- DATOS DE CABECERA DE LA FACTURA -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div>
                   <label class="block font-black text-slate-600 uppercase mb-1">Proveedor Oficial *</label>
@@ -322,7 +320,6 @@
                 </div>
               </div>
 
-              <!-- TABLA DINÁMICA DE PRODUCTOS DE LA FACTURA -->
               <div class="space-y-3">
                 <div class="flex justify-between items-center">
                   <span class="font-black text-xs uppercase text-slate-700 tracking-wider">Productos Incluidos en la Factura</span>
@@ -349,7 +346,6 @@
                 </div>
               </div>
 
-              <!-- CONSOLIDADO TOTAL DE LA FACTURA -->
               <div class="bg-indigo-50/70 p-4 rounded-2xl border border-indigo-200 flex flex-wrap justify-between items-center gap-4">
                 <div class="flex gap-6">
                   <div>
@@ -404,35 +400,80 @@
                 </tr>
               </thead>
               <tbody id="tabla-admin-clientes-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Inicia limpio -->
               </tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- 4. PESTAÑA: EMPLEADOS, FLOTA Y RENDIMIENTO -->
+      <!-- 4. PESTAÑA: EMPLEADOS, FLOTA Y RENDIMIENTO ANALÍTICO -->
       <section id="vista-equipo" class="space-y-6" style="display: none;">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-wrap justify-between items-center gap-3">
           <div>
-            <h2 class="text-lg lg:text-xl font-black text-slate-900">Personal Operativo, Vehículos y Métricas</h2>
-            <p class="text-xs text-slate-500">Histórico de ventas semanal/mensual, PINs de acceso para repartidores y odómetro.</p>
+            <h2 class="text-lg lg:text-xl font-black text-slate-900">Personal Operativo, Flota y Analítica de Ventas</h2>
+            <p class="text-xs text-slate-500">Administra repartidores, vehículos y consulta el historial de ventas y rotación de producto.</p>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="window.abrirModalVehiculo()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-black text-xs rounded-xl shadow-md">
+              + Nuevo Vehículo / Flota
+            </button>
+            <button type="button" onclick="window.abrirModalEmpleado()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md">
+              + Nuevo Empleado / Ficha
+            </button>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Columna Fichas Empleados (7 cols) -->
           <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h3 class="font-black text-sm text-slate-900 uppercase">Fichas de Empleados y Rendimiento</h3>
+            <div class="flex justify-between items-center border-b pb-2">
+              <h3 class="font-black text-sm text-slate-900 uppercase">Fichas de Repartidores & Rendimiento</h3>
+              <span class="text-[11px] text-slate-400">Haz clic en la ficha para ver rotación</span>
+            </div>
             <div id="lista-empleados-admin" class="space-y-3 text-xs">
-              <!-- Inyectado por JS -->
+              <!-- Se llena dinámicamente -->
             </div>
           </div>
 
+          <!-- Columna Flota y Kilometraje (5 cols) -->
           <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <h3 class="font-black text-sm text-slate-900 uppercase">Control de Flota y Kilometraje</h3>
-            <div id="lista-vehiculos-admin" class="space-y-3 text-xs">
-              <!-- Inyectado por JS -->
+            <div class="flex justify-between items-center border-b pb-2">
+              <h3 class="font-black text-sm text-slate-900 uppercase">Control de Flota y Kilometraje</h3>
+              <span class="text-[11px] text-slate-400">Gestión de móviles</span>
             </div>
+            <div id="lista-vehiculos-admin" class="space-y-3 text-xs">
+              <!-- Se llena dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN DE REMISIONES EN TIEMPO REAL RECIBIDAS DE LOS REPARTIDORES -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-2 border-b pb-3">
+            <div>
+              <h3 class="font-black text-sm text-slate-900 uppercase">Bandeja de Remisiones Emitidas en Ruta</h3>
+              <p class="text-xs text-slate-500">Haz clic en cualquier remisión para abrir la ventana flotante con el detalle de los productos vendidos.</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 border-b text-slate-500 uppercase font-black">
+                <tr>
+                  <th class="p-3">Código Remisión</th>
+                  <th class="p-3">Repartidor</th>
+                  <th class="p-3">Cliente</th>
+                  <th class="p-3">Fecha / Hora</th>
+                  <th class="p-3">Forma de Pago</th>
+                  <th class="p-3 text-right">Total Cobrado</th>
+                  <th class="p-3 text-center">Detalle Ítems</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-remisiones-repartidor-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                <!-- Se llena dinámicamente -->
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -462,7 +503,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-gastos-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Inicia limpio -->
               </tbody>
             </table>
           </div>
@@ -490,7 +531,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-auditoria-facturas-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
-                <!-- Inyectado por JS -->
+                <!-- Inicia limpio -->
               </tbody>
             </table>
           </div>
@@ -566,8 +607,365 @@
 
   </div>
 
+  <!-- MODAL: CREAR O EDITAR VEHÍCULO / FLOTA -->
+  <div id="modal-vehiculo" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-lg text-slate-900" id="titulo-modal-vehiculo">Gestión de Vehículo / Flota</h3>
+        <button type="button" onclick="window.cerrarModalVehiculo()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+      <form onsubmit="window.guardarVehiculoForm(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="veh-id-editar">
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Placa del Vehículo *</label>
+          <input type="text" id="veh-placa" required placeholder="Ej: ABC123" class="w-full p-2.5 bg-slate-50 border rounded-xl font-black uppercase outline-none">
+        </div>
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Tipo de Vehículo *</label>
+          <input type="text" id="veh-tipo" required placeholder="Ej: Camión NHR, Motocarguero..." class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Capacidad Pacas</label>
+            <input type="number" id="veh-capacidad" min="1" value="120" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">KM Inicial</label>
+            <input type="number" id="veh-km-inicial" min="0" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">KM Odómetro</label>
+            <input type="number" id="veh-km-actual" min="0" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-center outline-none">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl shadow-md mt-2">
+          Guardar Vehículo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR O EDITAR FICHA EMPLEADO / REPARTIDOR -->
+  <div id="modal-empleado" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-lg text-slate-900" id="titulo-modal-empleado">Ficha de Empleado / Repartidor</h3>
+        <button type="button" onclick="window.cerrarModalEmpleado()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+      <form onsubmit="window.guardarEmpleadoForm(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="emp-id-editar">
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Nombre Completo *</label>
+          <input type="text" id="emp-nombre" required placeholder="Ej: Luis Martínez" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Rol / Cargo *</label>
+            <select id="emp-rol" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+              <option value="Repartidor">Repartidor (Conductor Móvil)</option>
+              <option value="Preventista">Preventista</option>
+              <option value="Auxiliar Bodega">Auxiliar Bodega</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Teléfono / WhatsApp *</label>
+            <input type="tel" id="emp-tel" required placeholder="310..." class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Vehículo Asignado</label>
+          <select id="emp-vehiculo-sel" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+            <option value="Sin vehículo asignado">Sin vehículo asignado</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-black text-indigo-900 uppercase mb-1">PIN Acceso Móvil *</label>
+            <input type="text" id="emp-pin" required maxlength="4" placeholder="1140" class="w-full p-2.5 bg-indigo-50 border border-indigo-300 rounded-xl font-black text-center text-sm outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">% Comisión</label>
+            <input type="number" id="emp-comision" step="0.1" value="3.0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-center outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Meta Mensual ($)</label>
+            <input type="number" id="emp-meta" value="15000000" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold text-center outline-none">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md mt-2">
+          Guardar Ficha de Empleado
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL FLOTANTE 1: DETALLE DE REMISIÓN COMPLETA -->
+  <div id="modal-detalle-remision" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-2xl rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-indigo-600 tracking-wider block" id="det-rem-tipo">REMISIÓN DE RUTA MÓVIL</span>
+          <h3 class="font-black text-lg text-slate-900" id="det-rem-codigo">RM-0000</h3>
+        </div>
+        <button type="button" onclick="window.cerrarModalDetalleRemision()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+
+      <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold block">Repartidor:</span>
+          <span class="font-black text-slate-800" id="det-rem-repartidor">-</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold block">Cliente:</span>
+          <span class="font-black text-slate-800" id="det-rem-cliente">-</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold block">Fecha / Hora:</span>
+          <span class="font-bold text-slate-700" id="det-rem-fecha">-</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold block">Forma de Pago:</span>
+          <span class="font-black text-emerald-700 uppercase" id="det-rem-pago">-</span>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="font-black text-xs text-slate-700 uppercase tracking-wider">Productos Entregados en esta Remisión</h4>
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 border-b text-slate-500 font-black uppercase">
+              <tr>
+                <th class="p-2.5">Producto</th>
+                <th class="p-2.5 text-center">Cantidad</th>
+                <th class="p-2.5 text-right">Precio Paca</th>
+                <th class="p-2.5 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody id="det-rem-items-body" class="divide-y divide-slate-100">
+              <!-- Inyectado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-200 flex justify-between items-center">
+        <span class="font-black text-xs uppercase text-indigo-950">Total Facturado en Remisión:</span>
+        <span class="font-black text-2xl text-indigo-950" id="det-rem-gran-total">$0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FLOTANTE 2: ANALÍTICA Y ROTACIÓN DE PRODUCTOS POR REPARTIDOR -->
+  <div id="modal-rotacion-repartidor" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-3xl rounded-3xl p-6 space-y-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <div>
+          <span class="text-[10px] font-black uppercase text-indigo-600 tracking-wider block">INFORME DE RENDIMIENTO Y ROTACIÓN</span>
+          <h3 class="font-black text-xl text-slate-900" id="rot-nombre-repartidor">Nombre Repartidor</h3>
+          <p class="text-xs text-slate-400" id="rot-subtitulo-repartidor">Vehículo • Comisión</p>
+        </div>
+        <button type="button" onclick="window.cerrarModalRotacion()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+
+      <!-- SELECTOR DE PERIODOS (DÍA / SEMANA / MES / PERSONALIZADO) -->
+      <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex flex-wrap justify-between items-center gap-3 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="font-black text-slate-600 uppercase">Periodo:</span>
+          <button type="button" onclick="window.filtrarPeriodoRotacion('hoy')" id="btn-per-hoy" class="px-3 py-1.5 rounded-xl font-bold bg-white border border-slate-300">Hoy</button>
+          <button type="button" onclick="window.filtrarPeriodoRotacion('semana')" id="btn-per-semana" class="px-3 py-1.5 rounded-xl font-black bg-indigo-600 text-white shadow-sm">Semana</button>
+          <button type="button" onclick="window.filtrarPeriodoRotacion('mes')" id="btn-per-mes" class="px-3 py-1.5 rounded-xl font-bold bg-white border border-slate-300">Mes</button>
+        </div>
+        <button type="button" onclick="window.exportarInformeRotacionCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-sm flex items-center gap-1.5">
+          <span>📥</span> <span>Descargar Informe de Rotación</span>
+        </button>
+      </div>
+
+      <!-- KPI VENTAS DEL PERIODO -->
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Vendido</span>
+          <span class="font-black text-lg text-indigo-950" id="rot-kpi-total-dinero">$0</span>
+        </div>
+        <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Comisión Generada</span>
+          <span class="font-black text-lg text-emerald-700" id="rot-kpi-comision">$0</span>
+        </div>
+        <div class="bg-amber-50/50 p-3 rounded-2xl border border-amber-100">
+          <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Pacas Sacadas</span>
+          <span class="font-black text-lg text-amber-900" id="rot-kpi-total-pacas">0 pacas</span>
+        </div>
+      </div>
+
+      <!-- TABLA DE HISTÓRICO DE CANTIDADES POR PRODUCTO (SIN PRECIO - ANÁLISIS DE ROTACIÓN) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <div>
+            <h4 class="font-black text-xs text-slate-900 uppercase tracking-wider">Histórico de Cantidades por Referencia (Rotación Pura)</h4>
+            <p class="text-[11px] text-slate-500">Permite auditar si el repartidor vende solo lo convencional o si rota productos de baja salida.</p>
+          </div>
+        </div>
+
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-100 border-b text-slate-500 font-black uppercase">
+              <tr>
+                <th class="p-3">Producto / Presentación</th>
+                <th class="p-3 text-center">Pacas Físicas Vendidas</th>
+                <th class="p-3 text-center">Unidades Totales</th>
+                <th class="p-3 text-center">Nivel de Rotación en Calle</th>
+              </tr>
+            </thead>
+            <tbody id="rot-tabla-cantidades-body" class="divide-y divide-slate-100 font-semibold text-slate-700">
+              <!-- Inyectado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL MANUAL DE CREACIÓN DE PRODUCTO -->
+  <div id="modal-producto" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-lg text-slate-900">Creación Manual de Producto</h3>
+        <button type="button" onclick="window.cerrarModalProducto()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+      <form onsubmit="window.guardarProductoManual(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Nombre Comercial *</label>
+          <input type="text" id="m-prod-nombre" required placeholder="Ej: Coca-Cola 1.5 Lt (1.5 Lt)" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">SKU *</label>
+            <input type="text" id="m-prod-sku" required placeholder="KO-001" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Factor Empaque *</label>
+            <input type="number" id="m-prod-factor" required min="1" placeholder="12" class="w-full p-2.5 bg-slate-50 border rounded-xl font-black text-center outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Costo Compra Paca *</label>
+            <input type="number" id="m-prod-costo" required min="0" placeholder="65000" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Precio Mostrador Paca *</label>
+            <input type="number" id="m-prod-venta-mostrador" required min="0" placeholder="77000" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Precio Mayorista Paca *</label>
+            <input type="number" id="m-prod-venta-mayorista" required min="0" placeholder="75000" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-emerald-800 uppercase mb-1">Precio Pronto Pago *</label>
+            <input type="number" id="m-prod-venta-pronto" required min="0" placeholder="73000" class="w-full p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl font-bold text-emerald-950 outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Precio Unidad Suelta *</label>
+            <input type="number" id="m-prod-venta-unidad" required min="0" placeholder="7500" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Stock Inicial (Pacas) *</label>
+            <input type="number" id="m-prod-stock-inicial" required min="0" placeholder="0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-center">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md mt-2">
+          Guardar Producto
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVO CLIENTE -->
+  <div id="modal-cliente" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-lg rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-lg text-slate-900">Nuevo Cliente & Crédito Cíclico</h3>
+        <button type="button" onclick="window.cerrarModalNuevoCliente()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+      <form onsubmit="window.guardarClienteNuevo(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Nombre Tienda / Negocio *</label>
+          <input type="text" id="m-cli-tienda" required placeholder="Ej: Tienda La 20" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Propietario *</label>
+            <input type="text" id="m-cli-prop" required placeholder="Ej: Alberto Gómez" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Teléfono / WhatsApp *</label>
+            <input type="tel" id="m-cli-tel" required placeholder="310..." class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Modalidad *</label>
+            <select id="m-cli-modalidad" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+              <option value="credito">Crédito</option>
+              <option value="efectivo">Solo Efectivo</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Cupo Máximo ($)</label>
+            <input type="number" id="m-cli-cupo" value="0" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+          </div>
+          <div>
+            <label class="block font-black text-slate-600 uppercase mb-1">Días Plazo</label>
+            <input type="number" id="m-cli-dias" value="15" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none text-center">
+          </div>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl shadow-md mt-2">
+          Guardar Cliente
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL GASTO OPERATIVO -->
+  <div id="modal-gasto" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-black text-lg text-slate-900">Registrar Gasto Operativo</h3>
+        <button type="button" onclick="window.cerrarModalGasto()" class="p-1 font-black text-slate-400 hover:text-slate-700 text-xl">✕</button>
+      </div>
+      <form onsubmit="window.guardarGasto(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Categoría *</label>
+          <select id="m-gasto-cat" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+            <option value="Combustible">Combustible</option>
+            <option value="Fletes">Fletes Fluviales / Aéreos</option>
+            <option value="Mantenimiento">Mantenimiento Vehículo</option>
+            <option value="Nómina">Nómina y Salarios</option>
+            <option value="Arriendo">Arriendo de Bodega</option>
+            <option value="Servicios">Servicios Públicos</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Descripción *</label>
+          <input type="text" id="m-gasto-desc" required placeholder="Ej: Tanqueada vehículo" class="w-full p-2.5 bg-slate-50 border rounded-xl font-bold outline-none">
+        </div>
+        <div>
+          <label class="block font-black text-slate-600 uppercase mb-1">Monto Pagado ($) *</label>
+          <input type="number" id="m-gasto-monto" required min="1" placeholder="Ej: 100000" class="w-full p-2.5 bg-slate-50 border rounded-xl font-black text-slate-900 outline-none">
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-black rounded-xl shadow-md mt-2">
+          Asentar Gasto
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- SCRIPT DEFINITIVO DE CONTROL -->
   <script>
+    // PINS DE ACCESO INTACTOS
     var pinsAdmin = { 'Miguel': '0000', 'Diego': '1234', 'Rodrigo': '1730' };
     var adminSeleccionado = 'Rodrigo';
 
@@ -604,36 +1002,21 @@
       }
     };
 
+    // VARIABLES TOTALMENTE LIMPIAS
     var productosAdmin = [];
     var inventarioInicialHistorico = [];
-    var filasFacturaCompra = []; // [{ id, productoId, pacas, costo }]
-    
-    var gastosOperativos = [
-      { id: 'gst-1', fecha: '2026-09-15', categoria: 'Combustible', desc: 'Tanqueada NHR ABC123', monto: 180000 },
-      { id: 'gst-2', fecha: '2026-09-14', categoria: 'Fletes', desc: 'Flete fluvial remesa Inírida', monto: 450000 },
-      { id: 'gst-3', fecha: '2026-09-12', categoria: 'Arriendo', desc: 'Cuota mensual bodega', monto: 1200000 }
-    ];
+    var filasFacturaCompra = [];
+    var gastosOperativos = [];
+    var clientesAdmin = [];
+    var empleadosAdmin = [];
+    var vehiculosAdmin = [];
+    var facturasAuditoria = [];
+    var remisionesRepartidores = []; // [{ id, codigo, repartidorId, cliente, fecha, total, medio, items: [{ nombre, pacas, factor, subtotal }] }]
 
-    var clientesAdmin = [
-      { id: 'cli-1', tienda: 'Tienda Don José', prop: 'José Pérez', tel: '3101234567', modalidad: 'credito', cupo: 2500000, inicio_credito: '2026-09-01', fin_credito: '2026-09-16', estado: 'al_dia' },
-      { id: 'cli-2', tienda: 'Superete La Cabaña', prop: 'Carlos Gómez', tel: '3129876543', modalidad: 'credito', cupo: 4000000, inicio_credito: '2026-09-05', fin_credito: '2026-09-20', estado: 'al_dia' }
-    ];
+    var empleadoSeleccionadoRotacion = null;
+    var periodoRotacionActivo = 'semana';
 
-    var empleadosAdmin = [
-      { id: 'emp-1', nombre: 'Luis Martínez', rol: 'Repartidor', vehiculo: 'Camión NHR (ABC123)', pin: '1140', comision: 3.0, venta_semana: 3450000, venta_mes: 14200000, meta: 15000000 },
-      { id: 'emp-2', nombre: 'Carlos Méndez', rol: 'Preventista', vehiculo: 'Zona Centro (Moto)', pin: '2210', comision: 2.5, venta_semana: 2800000, venta_mes: 11500000, meta: 12000000 }
-    ];
-
-    var vehiculosAdmin = [
-      { id: 'veh-1', placa: 'ABC123', tipo: 'Camión NHR', capacidad: 120, km_inicial: 11400, km_actual: 11470 }
-    ];
-
-    var facturasAuditoria = [
-      { id: 'FAC-0001', codigo: 'FAC-0001', tipo: 'Mostrador', cliente: 'Cliente Mostrador', total: 154000, cmv: 130000, estado: 'emitida' },
-      { id: 'RM-ABC123-0001', codigo: 'RM-ABC123-0001', tipo: 'Ruta Móvil', cliente: 'Tienda Don José', total: 345000, cmv: 290000, estado: 'emitida' },
-      { id: 'RM-ABC123-0002', codigo: 'RM-ABC123-0002', tipo: 'Ruta Móvil', cliente: 'Superete La Cabaña', total: 580000, cmv: 490000, estado: 'emitida' }
-    ];
-
+    // NAVEGACIÓN
     window.cambiarSeccion = function(seccionId) {
       ['pyg', 'inventario', 'clientes', 'equipo', 'gastos', 'auditoria', 'ajustes'].forEach(function(s) {
         var sec = document.getElementById('vista-' + s);
@@ -649,7 +1032,10 @@
       if (seccionId === 'pyg') window.calcularEstadoResultados();
       if (seccionId === 'inventario') window.renderizarProductosAdmin();
       if (seccionId === 'clientes') window.renderizarClientesAdmin();
-      if (seccionId === 'equipo') window.renderizarEquipoAdmin();
+      if (seccionId === 'equipo') {
+        window.renderizarEquipoAdmin();
+        window.renderizarRemisionesRepartidores();
+      }
       if (seccionId === 'gastos') window.renderizarGastosAdmin();
       if (seccionId === 'auditoria') window.renderizarAuditoriaFacturas();
     };
@@ -670,7 +1056,7 @@
       if (subId === 'factura_compra') window.iniciarFormularioFacturaCompra();
     };
 
-    // CARGA MASIVA DE EXCEL / CSV PARA ESTABLECER INVENTARIO INICIAL
+    // CARGA DE EXCEL MASIVO
     window.cargarExcelMasivo = function(event) {
       var file = event.target.files[0];
       if (!file) return;
@@ -683,10 +1069,7 @@
           var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
           var jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-          if (!jsonData || jsonData.length === 0) {
-            alert("El archivo Excel/CSV está vacío.");
-            return;
-          }
+          if (!jsonData || jsonData.length === 0) return alert("El archivo Excel/CSV está vacío.");
 
           var fechaHoy = new Date().toISOString().split('T')[0];
           productosAdmin = [];
@@ -726,22 +1109,28 @@
             });
           });
 
-          alert(`¡Catálogo e Inventario Inicial Cargados!\nSe procesaron ${productosAdmin.length} productos. La línea base histórica quedó congelada.`);
+          alert(`¡Catálogo e Inventario Inicial Cargados!\nSe procesaron ${productosAdmin.length} productos.`);
           window.renderizarProductosAdmin();
           window.renderizarInvInicial();
           window.cambiarSubpestanaInv('inicial');
         } catch (err) {
-          console.error(err);
-          alert("Error al leer el archivo Excel.");
+          alert("Error al procesar el archivo.");
         }
       };
       reader.readAsArrayBuffer(file);
     };
 
+    // RENDERIZADO INVENTARIO INICIAL
     window.renderizarInvInicial = function() {
       var tbody = document.getElementById('tabla-inv-inicial-body');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!inventarioInicialHistorico || inventarioInicialHistorico.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No hay inventario inicial cargado aún. Sube el archivo Excel/CSV para iniciar la línea base histórica.</td></tr>';
+        document.getElementById('inv-inicial-gran-total').innerText = '$0';
+        return;
+      }
 
       var granTotal = 0;
       inventarioInicialHistorico.forEach(function(item) {
@@ -760,14 +1149,19 @@
         `;
         tbody.appendChild(tr);
       });
-
       document.getElementById('inv-inicial-gran-total').innerText = `$${granTotal.toLocaleString()}`;
     };
 
+    // RENDERIZADO CATÁLOGO
     window.renderizarProductosAdmin = function() {
       var tbody = document.getElementById('tabla-admin-productos-body');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!productosAdmin || productosAdmin.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="p-8 text-center text-slate-400 italic">No hay productos en el catálogo. Carga el Excel inicial o crea productos manualmente.</td></tr>';
+        return;
+      }
 
       productosAdmin.forEach(function(p) {
         var tr = document.createElement('tr');
@@ -787,25 +1181,25 @@
       });
     };
 
-    // INGRESO MULTI-PRODUCTO POR FACTURA DE COMPRA SIMULTÁNEO
+    // FACTURAS DE COMPRA
     window.iniciarFormularioFacturaCompra = function() {
       document.getElementById('fc-fecha').valueAsDate = new Date();
-      if (filasFacturaCompra.length === 0) {
+      if (filasFacturaCompra.length === 0 && productosAdmin.length > 0) {
         window.agregarFilaFacturaCompra();
+      } else {
+        window.renderizarFilasFacturaCompra();
       }
     };
 
     window.agregarFilaFacturaCompra = function() {
-      var filaId = 'fila-fc-' + Date.now() + Math.random().toString().slice(2, 5);
-      filasFacturaCompra.push({ id: filaId, productoId: (productosAdmin[0] ? productosAdmin[0].id : ''), pacas: 1, costo: (productosAdmin[0] ? productosAdmin[0].costo : 0) });
+      if (productosAdmin.length === 0) return alert("Primero debes tener productos cargados en catálogo.");
+      var filaId = 'fila-fc-' + Date.now();
+      filasFacturaCompra.push({ id: filaId, productoId: productosAdmin[0].id, pacas: 1, costo: productosAdmin[0].costo });
       window.renderizarFilasFacturaCompra();
     };
 
     window.eliminarFilaFacturaCompra = function(filaId) {
-      if (filasFacturaCompra.length <= 1) {
-        alert("La factura debe tener al menos un producto.");
-        return;
-      }
+      if (filasFacturaCompra.length <= 1) return alert("La factura debe tener al menos un producto.");
       filasFacturaCompra = filasFacturaCompra.filter(f => f.id !== filaId);
       window.renderizarFilasFacturaCompra();
     };
@@ -815,10 +1209,18 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
+      if (filasFacturaCompra.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-400 italic">No hay productos añadidos a la factura.</td></tr>';
+        document.getElementById('fc-resumen-items').innerText = '0 productos';
+        document.getElementById('fc-resumen-pacas').innerText = '0 pacas';
+        document.getElementById('fc-resumen-gran-total').innerText = '$0';
+        return;
+      }
+
       var totalPacas = 0;
       var totalFactura = 0;
 
-      filasFacturaCompra.forEach(function(fila, idx) {
+      filasFacturaCompra.forEach(function(fila) {
         var sub = fila.pacas * fila.costo;
         totalPacas += fila.pacas;
         totalFactura += sub;
@@ -886,28 +1288,22 @@
       var numFactura = document.getElementById('fc-numero').value;
       var proveedor = document.getElementById('fc-proveedor').value;
 
-      if (filasFacturaCompra.length === 0) {
-        alert("Agrega al menos un producto a la factura.");
-        return;
-      }
+      if (filasFacturaCompra.length === 0) return alert("Agrega al menos un producto a la factura.");
 
       var totalPacas = 0;
       var totalFactura = 0;
 
-      // PROCESAMIENTO SIMULTÁNEO DE TODOS LOS PRODUCTOS
       filasFacturaCompra.forEach(function(fila) {
         var prod = productosAdmin.find(p => p.id === fila.productoId);
         if (prod) {
-          prod.stock += fila.pacas; // Suma stock a la Bodega Central
-          prod.costo = fila.costo;  // Actualiza costo ponderado
+          prod.stock += fila.pacas;
+          prod.costo = fila.costo;
           totalPacas += fila.pacas;
           totalFactura += (fila.pacas * fila.costo);
         }
       });
 
-      alert(`¡Factura ${numFactura} de ${proveedor} procesada con éxito!\n- ${filasFacturaCompra.length} referencias cargadas simultáneamente.\n- ${totalPacas} pacas totales sumadas a Bodega Central.\n- Monto total: $${totalFactura.toLocaleString()}.`);
-
-      // Limpiar formulario
+      alert(`¡Factura ${numFactura} procesada!\nSe ingresaron ${totalPacas} pacas a Bodega Central.`);
       document.getElementById('fc-numero').value = '';
       filasFacturaCompra = [];
       window.iniciarFormularioFacturaCompra();
@@ -915,11 +1311,16 @@
       window.cambiarSubpestanaInv('catalogo');
     };
 
-    // CLIENTES Y CRÉDITO CÍCLICO
+    // CLIENTES
     window.renderizarClientesAdmin = function() {
       var tbody = document.getElementById('tabla-admin-clientes-body');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!clientesAdmin || clientesAdmin.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="p-8 text-center text-slate-400 italic">No hay clientes registrados en cartera todavía.</td></tr>';
+        return;
+      }
 
       clientesAdmin.forEach(function(c, idx) {
         var tr = document.createElement('tr');
@@ -949,93 +1350,659 @@
       var hoy = new Date();
       var prox = new Date();
       prox.setDate(hoy.getDate() + 15);
-
       c.inicio_credito = hoy.toISOString().split('T')[0];
       c.fin_credito = prox.toISOString().split('T')[0];
       c.estado = 'al_dia';
-      alert(`¡Crédito renovado para ${c.tienda}!\nNuevo ciclo: ${c.inicio_credito} al ${c.fin_credito}.`);
+      alert(`¡Crédito renovado para ${c.tienda}!`);
       window.renderizarClientesAdmin();
     };
 
-    // EMPLEADOS, VEHÍCULOS, HISTORIAL Y PINS
-    window.renderizarEquipoAdmin = function() {
-      var contEmp = document.getElementById('lista-empleados-admin');
-      contEmp.innerHTML = '';
-      empleadosAdmin.forEach(function(e, idx) {
-        var pctMeta = Math.min(100, Math.round((e.venta_mes / e.meta) * 100));
-        contEmp.innerHTML += `
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="font-black text-slate-900 text-sm block">${e.nombre}</span>
-                <span class="text-slate-500 font-bold text-[11px]">${e.rol} • ${e.vehiculo}</span>
-              </div>
-              <div class="text-right">
-                <span class="bg-indigo-100 text-indigo-900 px-2 py-0.5 rounded font-black text-[10px] block">PIN: ${e.pin}</span>
-                <span class="text-[10px] font-bold text-emerald-700">${e.comision}% Comisión</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center">
-              <div>
-                <span class="text-[10px] text-slate-400 font-bold uppercase block">Venta Semana</span>
-                <span class="font-black text-slate-900">$${e.venta_semana.toLocaleString()}</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400 font-bold uppercase block">Venta Mes (Meta)</span>
-                <span class="font-black text-indigo-950">$${e.venta_mes.toLocaleString()} / $${e.meta.toLocaleString()}</span>
-              </div>
-            </div>
-            <div class="flex justify-between items-center text-[11px]">
-              <span class="text-slate-500 font-bold">Progreso Meta: <b>${pctMeta}%</b></span>
-              <button type="button" onclick="window.cambiarPinEmpleado(${idx})" class="text-indigo-600 font-bold hover:underline">Cambiar PIN</button>
-            </div>
-          </div>
-        `;
-      });
-
-      var contVeh = document.getElementById('lista-vehiculos-admin');
-      contVeh.innerHTML = '';
-      vehiculosAdmin.forEach(function(v) {
-        var recorrido = v.km_actual - v.km_inicial;
-        contVeh.innerHTML += `
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-            <div class="flex justify-between items-center">
-              <div>
-                <span class="font-black text-slate-900 text-sm block">${v.tipo} • Placa: ${v.placa}</span>
-                <span class="text-slate-500 font-bold text-[11px]">Capacidad: ${v.capacidad} pacas</span>
-              </div>
-              <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-black text-[10px] uppercase">Operativo</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center text-xs">
-              <div>
-                <span class="text-[10px] text-slate-400 font-bold block">KM Inicial</span>
-                <span class="font-black text-slate-800">${v.km_inicial} km</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400 font-bold block">KM Odómetro</span>
-                <span class="font-black text-indigo-900">${v.km_actual} km</span>
-              </div>
-              <div>
-                <span class="text-[10px] text-emerald-600 font-bold block">Recorrido</span>
-                <span class="font-black text-emerald-700">+${recorrido} km</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+    // ==========================================
+    // GESTIÓN CRUD DE EMPLEADOS Y FLOTA (VEHÍCULOS)
+    // ==========================================
+    window.abrirModalVehiculo = function(id = null) {
+      document.getElementById('veh-id-editar').value = id || '';
+      if (id) {
+        var v = vehiculosAdmin.find(item => item.id === id);
+        if (v) {
+          document.getElementById('titulo-modal-vehiculo').innerText = 'Editar Vehículo: ' + v.placa;
+          document.getElementById('veh-placa').value = v.placa;
+          document.getElementById('veh-tipo').value = v.tipo;
+          document.getElementById('veh-capacidad').value = v.capacidad;
+          document.getElementById('veh-km-inicial').value = v.km_inicial;
+          document.getElementById('veh-km-actual').value = v.km_actual;
+        }
+      } else {
+        document.getElementById('titulo-modal-vehiculo').innerText = 'Nuevo Vehículo / Flota';
+        document.getElementById('veh-placa').value = '';
+        document.getElementById('veh-tipo').value = '';
+        document.getElementById('veh-capacidad').value = 120;
+        document.getElementById('veh-km-inicial').value = 0;
+        document.getElementById('veh-km-actual').value = 0;
+      }
+      document.getElementById('modal-vehiculo').style.display = 'flex';
     };
 
-    window.cambiarPinEmpleado = function(idx) {
-      var e = empleadosAdmin[idx];
-      var nuevo = prompt(`Ingresa nuevo PIN de 4 dígitos para ${e.nombre}:`, e.pin);
-      if (nuevo && nuevo.length === 4) {
-        e.pin = nuevo;
+    window.cerrarModalVehiculo = function() {
+      document.getElementById('modal-vehiculo').style.display = 'none';
+    };
+
+    window.guardarVehiculoForm = function(e) {
+      e.preventDefault();
+      var id = document.getElementById('veh-id-editar').value;
+      var placa = document.getElementById('veh-placa').value.toUpperCase().trim();
+      var tipo = document.getElementById('veh-tipo').value.trim();
+      var capacidad = parseInt(document.getElementById('veh-capacidad').value) || 0;
+      var kmIni = parseFloat(document.getElementById('veh-km-inicial').value) || 0;
+      var kmAct = parseFloat(document.getElementById('veh-km-actual').value) || 0;
+
+      if (id) {
+        var v = vehiculosAdmin.find(item => item.id === id);
+        if (v) {
+          v.placa = placa;
+          v.tipo = tipo;
+          v.capacidad = capacidad;
+          v.km_inicial = kmIni;
+          v.km_actual = kmAct;
+        }
+      } else {
+        vehiculosAdmin.push({
+          id: 'veh-' + Date.now(),
+          placa: placa,
+          tipo: tipo,
+          capacidad: capacidad,
+          km_inicial: kmIni,
+          km_actual: kmAct
+        });
+      }
+
+      window.cerrarModalVehiculo();
+      window.renderizarEquipoAdmin();
+      alert("Vehículo guardado exitosamente.");
+    };
+
+    window.eliminarVehiculo = function(id) {
+      if (confirm("¿Estás seguro de eliminar este vehículo de la flota?")) {
+        vehiculosAdmin = vehiculosAdmin.filter(v => v.id !== id);
         window.renderizarEquipoAdmin();
-        alert(`PIN de ${e.nombre} actualizado a: ${e.pin}`);
       }
     };
 
-    // AJUSTES Y SEGURIDAD
+    window.abrirModalEmpleado = function(id = null) {
+      // Actualizar select de vehículos disponibles
+      var selVeh = document.getElementById('emp-vehiculo-sel');
+      selVeh.innerHTML = '<option value="Sin vehículo asignado">Sin vehículo asignado</option>';
+      vehiculosAdmin.forEach(v => {
+        selVeh.innerHTML += `<option value="${v.tipo} (${v.placa})">${v.tipo} (${v.placa})</option>`;
+      });
+
+      document.getElementById('emp-id-editar').value = id || '';
+      if (id) {
+        var emp = empleadosAdmin.find(item => item.id === id);
+        if (emp) {
+          document.getElementById('titulo-modal-empleado').innerText = 'Editar Empleado: ' + emp.nombre;
+          document.getElementById('emp-nombre').value = emp.nombre;
+          document.getElementById('emp-rol').value = emp.rol;
+          document.getElementById('emp-tel').value = emp.tel;
+          document.getElementById('emp-vehiculo-sel').value = emp.vehiculo || 'Sin vehículo asignado';
+          document.getElementById('emp-pin').value = emp.pin;
+          document.getElementById('emp-comision').value = emp.comision;
+          document.getElementById('emp-meta').value = emp.meta;
+        }
+      } else {
+        document.getElementById('titulo-modal-empleado').innerText = 'Nuevo Empleado / Ficha';
+        document.getElementById('emp-nombre').value = '';
+        document.getElementById('emp-rol').value = 'Repartidor';
+        document.getElementById('emp-tel').value = '';
+        document.getElementById('emp-pin').value = '';
+        document.getElementById('emp-comision').value = 3.0;
+        document.getElementById('emp-meta').value = 15000000;
+      }
+      document.getElementById('modal-empleado').style.display = 'flex';
+    };
+
+    window.cerrarModalEmpleado = function() {
+      document.getElementById('modal-empleado').style.display = 'none';
+    };
+
+    window.guardarEmpleadoForm = function(e) {
+      e.preventDefault();
+      var id = document.getElementById('emp-id-editar').value;
+      var nombre = document.getElementById('emp-nombre').value.trim();
+      var rol = document.getElementById('emp-rol').value;
+      var tel = document.getElementById('emp-tel').value.trim();
+      var veh = document.getElementById('emp-vehiculo-sel').value;
+      var pin = document.getElementById('emp-pin').value.trim();
+      var com = parseFloat(document.getElementById('emp-comision').value) || 0;
+      var meta = parseFloat(document.getElementById('emp-meta').value) || 0;
+
+      if (pin.length !== 4) return alert("El PIN de acceso debe tener exactamente 4 dígitos.");
+
+      if (id) {
+        var emp = empleadosAdmin.find(item => item.id === id);
+        if (emp) {
+          emp.nombre = nombre;
+          emp.rol = rol;
+          emp.tel = tel;
+          emp.vehiculo = veh;
+          emp.pin = pin;
+          emp.comision = com;
+          emp.meta = meta;
+        }
+      } else {
+        empleadosAdmin.push({
+          id: 'emp-' + Date.now(),
+          nombre: nombre,
+          rol: rol,
+          tel: tel,
+          vehiculo: veh,
+          pin: pin,
+          comision: com,
+          meta: meta
+        });
+      }
+
+      window.cerrarModalEmpleado();
+      window.renderizarEquipoAdmin();
+      alert("Ficha de empleado guardada exitosamente.");
+    };
+
+    window.eliminarEmpleado = function(id) {
+      if (confirm("¿Estás seguro de eliminar este empleado y su ficha?")) {
+        empleadosAdmin = empleadosAdmin.filter(e => e.id !== id);
+        window.renderizarEquipoAdmin();
+      }
+    };
+
+    // RENDERIZADO DE FICHAS Y FLOTA
+    window.renderizarEquipoAdmin = function() {
+      var contEmp = document.getElementById('lista-empleados-admin');
+      if (contEmp) {
+        if (!empleadosAdmin || empleadosAdmin.length === 0) {
+          contEmp.innerHTML = '<p class="text-slate-400 italic py-8 text-center">No hay empleados registrados. Pulsa en "+ Nuevo Empleado / Ficha".</p>';
+        } else {
+          contEmp.innerHTML = empleadosAdmin.map((e) => {
+            // Calcular ventas del repartidor sumando sus remisiones
+            var rems = remisionesRepartidores.filter(r => r.repartidorId === e.id);
+            var totalVendido = rems.reduce((acc, r) => acc + r.total, 0);
+            var pctMeta = e.meta > 0 ? Math.min(100, Math.round((totalVendido / e.meta) * 100)) : 0;
+
+            return `
+              <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-black text-slate-900 text-sm">${e.nombre}</span>
+                      <span class="bg-indigo-100 text-indigo-900 text-[10px] font-black px-2 py-0.5 rounded">PIN: ${e.pin}</span>
+                    </div>
+                    <span class="text-slate-500 font-bold text-[11px]">${e.rol} • ${e.vehiculo || 'Sin carro'} • Tel: ${e.tel}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="window.abrirModalEmpleado('${e.id}')" class="px-2.5 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100" title="Editar ficha">✏️</button>
+                    <button type="button" onclick="window.eliminarEmpleado('${e.id}')" class="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-100" title="Eliminar">🗑️</button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center">
+                  <div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Ventas Acumuladas</span>
+                    <span class="font-black text-slate-900">$${totalVendido.toLocaleString()}</span>
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Meta Mensual</span>
+                    <span class="font-black text-indigo-950">$${e.meta.toLocaleString()} (${pctMeta}%)</span>
+                  </div>
+                </div>
+
+                <!-- BOTÓN PRINCIPAL: ABRIR VENTANA FLOTANTE CON ROTACIÓN POR PRODUCTO -->
+                <button type="button" onclick="window.abrirModalRotacion('${e.id}')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5">
+                  <span>📊</span> <span>Ver Informe de Ventas y Rotación de Productos</span>
+                </button>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      var contVeh = document.getElementById('lista-vehiculos-admin');
+      if (contVeh) {
+        if (!vehiculosAdmin || vehiculosAdmin.length === 0) {
+          contVeh.innerHTML = '<p class="text-slate-400 italic py-8 text-center">No hay vehículos en la flota. Pulsa en "+ Nuevo Vehículo / Flota".</p>';
+        } else {
+          contVeh.innerHTML = vehiculosAdmin.map(v => {
+            var rec = (v.km_actual || 0) - (v.km_inicial || 0);
+            return `
+              <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <span class="font-black text-slate-900 text-sm block">${v.tipo} • Placa: ${v.placa}</span>
+                    <span class="text-slate-500 font-bold text-[11px]">Capacidad: ${v.capacidad} pacas</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="window.abrirModalVehiculo('${v.id}')" class="px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-700 hover:bg-slate-100">✏️</button>
+                    <button type="button" onclick="window.eliminarVehiculo('${v.id}')" class="px-2 py-1 bg-rose-50 border border-rose-200 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-100">🗑️</button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 bg-white p-2.5 rounded-xl border border-slate-200 text-center text-xs">
+                  <div>
+                    <span class="text-[10px] text-slate-400 font-bold block">KM Inicial</span>
+                    <span class="font-black text-slate-800">${(v.km_inicial || 0)} km</span>
+                  </div>
+                  <div>
+                    <label class="text-[10px] text-slate-400 font-bold block">Odómetro Actual</label>
+                    <input type="number" value="${v.km_actual || 0}" onchange="window.actualizarOdometroVehiculo('${v.id}', this.value)" class="w-full text-center font-black text-indigo-900 outline-none border-b border-indigo-300 bg-transparent">
+                  </div>
+                  <div>
+                    <span class="text-[10px] text-emerald-600 font-bold block">Recorrido</span>
+                    <span class="font-black text-emerald-700">+${rec} km</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    };
+
+    window.actualizarOdometroVehiculo = function(id, nuevoKm) {
+      var v = vehiculosAdmin.find(item => item.id === id);
+      if (v) {
+        v.km_actual = parseFloat(nuevoKm) || v.km_actual;
+        window.renderizarEquipoAdmin();
+      }
+    };
+
+    // ==========================================
+    // BANDEJA Y DETALLE DE REMISIONES POR REPARTIDOR
+    // ==========================================
+    window.renderizarRemisionesRepartidores = function() {
+      var tbody = document.getElementById('tabla-remisiones-repartidor-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!remisionesRepartidores || remisionesRepartidores.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400 italic">No hay remisiones registradas en la jornada.</td></tr>';
+        return;
+      }
+
+      remisionesRepartidores.forEach(function(r) {
+        var emp = empleadosAdmin.find(e => e.id === r.repartidorId);
+        var nombreRepartidor = emp ? emp.nombre : 'Repartidor General';
+
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-black text-indigo-950">${r.codigo}</td>
+          <td class="p-3 font-bold">${nombreRepartidor}</td>
+          <td class="p-3 font-medium">${r.cliente}</td>
+          <td class="p-3 text-slate-500">${r.fecha}</td>
+          <td class="p-3 uppercase text-[10px] font-black text-slate-600">${r.medio}</td>
+          <td class="p-3 text-right font-black text-slate-900">$${r.total.toLocaleString()}</td>
+          <td class="p-3 text-center">
+            <button type="button" onclick="window.abrirModalDetalleRemision('${r.id}')" class="px-3 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-black shadow-sm">
+              🔍 Ver Detalle
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // MODAL DETALLE DE REMISIÓN FLOTANTE
+    window.abrirModalDetalleRemision = function(remId) {
+      var r = remisionesRepartidores.find(item => item.id === remId);
+      if (!r) return;
+
+      var emp = empleadosAdmin.find(e => e.id === r.repartidorId);
+      document.getElementById('det-rem-codigo').innerText = r.codigo;
+      document.getElementById('det-rem-repartidor').innerText = emp ? emp.nombre : 'Repartidor';
+      document.getElementById('det-rem-cliente').innerText = r.cliente;
+      document.getElementById('det-rem-fecha').innerText = r.fecha;
+      document.getElementById('det-rem-pago').innerText = r.medio;
+      document.getElementById('det-rem-gran-total').innerText = `$${r.total.toLocaleString()}`;
+
+      var tbody = document.getElementById('det-rem-items-body');
+      tbody.innerHTML = '';
+
+      if (!r.items || r.items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Sin desglose de ítems.</td></tr>';
+      } else {
+        r.items.forEach(function(it) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-2.5 font-bold text-slate-800">${it.nombre}</td>
+            <td class="p-2.5 text-center font-black">${it.pacas} pacas</td>
+            <td class="p-2.5 text-right font-semibold">$${(it.subtotal / (it.pacas || 1)).toLocaleString()}</td>
+            <td class="p-2.5 text-right font-black text-slate-900">$${it.subtotal.toLocaleString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('modal-detalle-remision').style.display = 'flex';
+    };
+
+    window.cerrarModalDetalleRemision = function() {
+      document.getElementById('modal-detalle-remision').style.display = 'none';
+    };
+
+    // ==========================================
+    // ANALÍTICA DE ROTACIÓN DE PRODUCTOS (SIN PRECIOS)
+    // ==========================================
+    window.abrirModalRotacion = function(empId) {
+      var emp = empleadosAdmin.find(e => e.id === empId);
+      if (!emp) return;
+
+      empleadoSeleccionadoRotacion = emp;
+      document.getElementById('rot-nombre-repartidor').innerText = emp.nombre;
+      document.getElementById('rot-subtitulo-repartidor').innerText = `${emp.rol} • ${emp.vehiculo || 'Sin vehículo'} • Comisión: ${emp.comision}%`;
+      
+      periodoRotacionActivo = 'semana';
+      window.filtrarPeriodoRotacion('semana');
+      document.getElementById('modal-rotacion-repartidor').style.display = 'flex';
+    };
+
+    window.cerrarModalRotacion = function() {
+      document.getElementById('modal-rotacion-repartidor').style.display = 'none';
+    };
+
+    window.filtrarPeriodoRotacion = function(periodo) {
+      periodoRotacionActivo = periodo;
+      ['hoy', 'semana', 'mes'].forEach(p => {
+        var b = document.getElementById('btn-per-' + p);
+        if (b) {
+          b.className = (p === periodo)
+            ? "px-3 py-1.5 rounded-xl font-black bg-indigo-600 text-white shadow-sm"
+            : "px-3 py-1.5 rounded-xl font-bold bg-white border border-slate-300";
+        }
+      });
+
+      window.calcularYRenderizarRotacion();
+    };
+
+    window.calcularYRenderizarRotacion = function() {
+      if (!empleadoSeleccionadoRotacion) return;
+
+      var empId = empleadoSeleccionadoRotacion.id;
+      var rems = remisionesRepartidores.filter(r => r.repartidorId === empId);
+
+      // Consolidar cantidades vendidas por cada producto (Sin precios)
+      var totalDinero = 0;
+      var totalPacasGeneral = 0;
+      var conteoProductos = {}; // { nombreProducto: { pacas: 0, unidades: 0 } }
+
+      // Inicializar con todos los productos del catálogo oficial para saber cuáles NO ha vendido
+      productosAdmin.forEach(p => {
+        conteoProductos[p.nombre] = { pacas: 0, unidades: 0, factor: p.factor };
+      });
+
+      rems.forEach(r => {
+        totalDinero += r.total;
+        if (r.items) {
+          r.items.forEach(it => {
+            totalPacasGeneral += it.pacas;
+            if (!conteoProductos[it.nombre]) {
+              conteoProductos[it.nombre] = { pacas: 0, unidades: 0, factor: it.factor || 12 };
+            }
+            conteoProductos[it.nombre].pacas += it.pacas;
+            conteoProductos[it.nombre].unidades += (it.pacas * (it.factor || 12));
+          });
+        }
+      });
+
+      var comision = totalDinero * ((empleadoSeleccionadoRotacion.comision || 3) / 100);
+
+      document.getElementById('rot-kpi-total-dinero').innerText = `$${totalDinero.toLocaleString()}`;
+      document.getElementById('rot-kpi-comision').innerText = `$${Math.round(comision).toLocaleString()}`;
+      document.getElementById('rot-kpi-total-pacas').innerText = `${totalPacasGeneral} pacas`;
+
+      var tbody = document.getElementById('rot-tabla-cantidades-body');
+      tbody.innerHTML = '';
+
+      var listaOrdenada = Object.keys(conteoProductos).map(nombre => ({
+        nombre: nombre,
+        pacas: conteoProductos[nombre].pacas,
+        unidades: conteoProductos[nombre].unidades
+      })).sort((a, b) => b.pacas - a.pacas);
+
+      if (listaOrdenada.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-400 italic">No hay productos vendidos en el periodo seleccionado.</td></tr>';
+        return;
+      }
+
+      listaOrdenada.forEach(item => {
+        var badgeRotacion = '';
+        if (item.pacas >= 10) {
+          badgeRotacion = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800">🔥 Alta Rotación</span>';
+        } else if (item.pacas > 0) {
+          badgeRotacion = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-800">⚡ Media Rotación</span>';
+        } else {
+          badgeRotacion = '<span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-rose-100 text-rose-800">⚠️ Sin Salida (Baja)</span>';
+        }
+
+        var tr = document.createElement('tr');
+        tr.className = item.pacas === 0 ? "bg-rose-50/40 hover:bg-rose-50" : "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3 font-black text-slate-800">${item.nombre}</td>
+          <td class="p-3 text-center font-black text-sm text-indigo-950">${item.pacas} pacas</td>
+          <td class="p-3 text-center font-bold text-slate-600">${item.unidades.toLocaleString()} uds</td>
+          <td class="p-3 text-center">${badgeRotacion}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.exportarInformeRotacionCSV = function() {
+      if (!empleadoSeleccionadoRotacion) return;
+      var emp = empleadoSeleccionadoRotacion;
+      var csv = `Informe de Rotación de Productos - ${emp.nombre}\nPeriodo: ${periodoRotacionActivo}\nFecha: ${new Date().toLocaleDateString()}\n\n`;
+      csv += "Producto,Pacas Vendidas,Unidades Fisicas,Estado Rotacion\n";
+
+      var filas = document.querySelectorAll('#rot-tabla-cantidades-body tr');
+      filas.forEach(tr => {
+        var cols = tr.querySelectorAll('td');
+        if (cols.length === 4) {
+          csv += `"${cols[0].innerText.trim()}",${cols[1].innerText.replace(' pacas','').trim()},${cols[2].innerText.replace(' uds','').trim()},"${cols[3].innerText.trim()}"\n`;
+        }
+      });
+
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Rotacion_${emp.nombre.replace(/\s+/g,'_')}_${periodoRotacionActivo}.csv`;
+      link.click();
+    };
+
+    // GASTOS OPERATIVOS
+    window.renderizarGastosAdmin = function() {
+      var tbody = document.getElementById('tabla-gastos-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!gastosOperativos || gastosOperativos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400 italic">No hay gastos asentados en el periodo contable.</td></tr>';
+        return;
+      }
+
+      gastosOperativos.forEach(function(g, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-bold">${g.fecha}</td>
+          <td class="p-3.5 uppercase font-bold text-[10px] text-amber-800">${g.categoria}</td>
+          <td class="p-3.5">${g.desc}</td>
+          <td class="p-3.5 text-right font-black text-rose-700">$${g.monto.toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <button type="button" onclick="gastosOperativos.splice(${idx}, 1); window.renderizarGastosAdmin(); window.calcularEstadoResultados();" class="text-rose-500 font-bold">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // AUDITORÍA
+    window.renderizarAuditoriaFacturas = function() {
+      var tbody = document.getElementById('tabla-auditoria-facturas-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!facturasAuditoria || facturasAuditoria.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-400 italic">No hay facturas emitidas para auditar en este turno.</td></tr>';
+        return;
+      }
+
+      facturasAuditoria.forEach(function(f, idx) {
+        var tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50";
+        tr.innerHTML = `
+          <td class="p-3.5 font-mono font-bold text-slate-900">${f.codigo}</td>
+          <td class="p-3.5">${f.tipo}</td>
+          <td class="p-3.5 font-bold">${f.cliente}</td>
+          <td class="p-3.5 text-right font-black text-slate-900">$${f.total.toLocaleString()}</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${f.estado === 'anulada' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${f.estado === 'anulada' ? 'Anulada' : 'Vigente'}
+            </span>
+          </td>
+          <td class="p-3.5 text-center">
+            ${f.estado === 'anulada' ? '<span class="text-slate-400 italic">Sin acciones</span>' : `<button type="button" onclick="facturasAuditoria[${idx}].estado='anulada'; window.renderizarAuditoriaFacturas(); window.calcularEstadoResultados();" class="px-3 py-1 bg-rose-600 text-white font-bold rounded-lg text-xs">Anular</button>`}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    // CÁLCULO P&G
+    window.calcularEstadoResultados = function() {
+      var ventasNetas = 0, cmvTotal = 0, facturasActivas = 0;
+      facturasAuditoria.forEach(f => {
+        if (f.estado !== 'anulada') {
+          ventasNetas += f.total;
+          cmvTotal += f.cmv || 0;
+          facturasActivas++;
+        }
+      });
+
+      // Sumar también ventas provenientes de remisiones móviles
+      remisionesRepartidores.forEach(r => {
+        ventasNetas += r.total;
+      });
+
+      var utilidadBruta = ventasNetas - cmvTotal;
+      var margenBrutoPct = (ventasNetas > 0) ? ((utilidadBruta / ventasNetas) * 100) : 0;
+      var totalGastos = gastosOperativos.reduce((a, b) => a + b.monto, 0);
+      var comisiones = ventasNetas * 0.03;
+      var utilidadNeta = utilidadBruta - totalGastos - comisiones;
+      var rentabilidadPct = (ventasNetas > 0) ? ((utilidadNeta / ventasNetas) * 100) : 0;
+
+      document.getElementById('kpi-ventas-totales').innerText = `$${ventasNetas.toLocaleString()}`;
+      document.getElementById('kpi-conteo-facturas').innerText = `${facturasActivas + remisionesRepartidores.length} documentos`;
+      document.getElementById('kpi-cmv-total').innerText = `-$${cmvTotal.toLocaleString()}`;
+      document.getElementById('kpi-margen-bruto-pct').innerText = `Margen Bruto: ${margenBrutoPct.toFixed(1)}%`;
+      document.getElementById('kpi-gastos-totales').innerText = `-$${totalGastos.toLocaleString()}`;
+      document.getElementById('kpi-utilidad-neta').innerText = (utilidadNeta >= 0 ? '$' : '-$') + Math.abs(utilidadNeta).toLocaleString();
+      document.getElementById('kpi-rentabilidad-neta-pct').innerText = `Rentabilidad: ${rentabilidadPct.toFixed(1)}%`;
+
+      document.getElementById('pyg-ventas-netas').innerText = `$${ventasNetas.toLocaleString()}`;
+      document.getElementById('pyg-cmv').innerText = `-$${cmvTotal.toLocaleString()}`;
+      document.getElementById('pyg-utilidad-bruta').innerText = `$${utilidadBruta.toLocaleString()}`;
+      document.getElementById('pyg-gastos-operacion').innerText = `-$${totalGastos.toLocaleString()}`;
+      document.getElementById('pyg-comisiones').innerText = `-$${Math.round(comisiones).toLocaleString()}`;
+      document.getElementById('pyg-utilidad-final').innerText = (utilidadNeta >= 0 ? '$' : '-$') + Math.abs(utilidadNeta).toLocaleString();
+
+      var margenContribucion = (margenBrutoPct > 0) ? (margenBrutoPct / 100) : 0.18;
+      var puntoEquilibrio = (totalGastos > 0) ? Math.round(totalGastos / margenContribucion) : 0;
+      document.getElementById('pto-equilibrio-valor').innerText = `$${puntoEquilibrio.toLocaleString()}`;
+      document.getElementById('pe-gastos-fijos').innerText = `$${totalGastos.toLocaleString()}`;
+      document.getElementById('pe-margen-pct').innerText = `${(margenContribucion * 100).toFixed(1)}%`;
+
+      var pctAvance = (puntoEquilibrio > 0) ? Math.min(100, Math.round((ventasNetas / puntoEquilibrio) * 100)) : 0;
+      document.getElementById('barra-progreso-equilibrio').style.width = pctAvance + '%';
+      document.getElementById('pto-equilibrio-texto').innerText = `Progreso: ${pctAvance}%`;
+    };
+
+    // MODALES Y GUARDADO
+    window.abrirModalProducto = function() { document.getElementById('modal-producto').style.display = 'flex'; };
+    window.cerrarModalProducto = function() { document.getElementById('modal-producto').style.display = 'none'; };
+    window.abrirModalNuevoCliente = function() { document.getElementById('modal-cliente').style.display = 'flex'; };
+    window.cerrarModalNuevoCliente = function() { document.getElementById('modal-cliente').style.display = 'none'; };
+    window.abrirModalGasto = function() { document.getElementById('modal-gasto').style.display = 'flex'; };
+    window.cerrarModalGasto = function() { document.getElementById('modal-gasto').style.display = 'none'; };
+
+    window.guardarProductoManual = function(e) {
+      e.preventDefault();
+      var nuevo = {
+        id: document.getElementById('m-prod-sku').value,
+        sku: document.getElementById('m-prod-sku').value,
+        nombre: document.getElementById('m-prod-nombre').value,
+        factor: parseInt(document.getElementById('m-prod-factor').value),
+        costo: parseFloat(document.getElementById('m-prod-costo').value),
+        mostrador: parseFloat(document.getElementById('m-prod-venta-mostrador').value),
+        mayorista: parseFloat(document.getElementById('m-prod-venta-mayorista').value),
+        pronto: parseFloat(document.getElementById('m-prod-venta-pronto').value),
+        unidad: parseFloat(document.getElementById('m-prod-venta-unidad').value),
+        stock: parseInt(document.getElementById('m-prod-stock-inicial').value) || 0
+      };
+
+      productosAdmin.push(nuevo);
+      inventarioInicialHistorico.push({
+        sku: nuevo.sku,
+        nombre: nuevo.nombre,
+        factor: nuevo.factor,
+        pacas_iniciales: nuevo.stock,
+        unidades_totales: nuevo.stock * nuevo.factor,
+        costo_paca: nuevo.costo,
+        valor_total: nuevo.stock * nuevo.costo,
+        fecha: new Date().toISOString().split('T')[0]
+      });
+
+      window.cerrarModalProducto();
+      window.renderizarProductosAdmin();
+      window.renderizarInvInicial();
+      alert("¡Producto creado exitosamente!");
+    };
+
+    window.guardarClienteNuevo = function(e) {
+      e.preventDefault();
+      var hoy = new Date().toISOString().split('T')[0];
+      var fin = new Date();
+      fin.setDate(new Date().getDate() + parseInt(document.getElementById('m-cli-dias').value));
+
+      clientesAdmin.push({
+        id: 'cli-' + Date.now(),
+        tienda: document.getElementById('m-cli-tienda').value,
+        prop: document.getElementById('m-cli-prop').value,
+        tel: document.getElementById('m-cli-tel').value,
+        modalidad: document.getElementById('m-cli-modalidad').value,
+        cupo: parseFloat(document.getElementById('m-cli-cupo').value),
+        inicio_credito: hoy,
+        fin_credito: fin.toISOString().split('T')[0],
+        estado: 'al_dia'
+      });
+
+      window.cerrarModalNuevoCliente();
+      window.renderizarClientesAdmin();
+      alert("Cliente registrado en cartera.");
+    };
+
+    window.guardarGasto = function(e) {
+      e.preventDefault();
+      gastosOperativos.unshift({
+        id: 'gst-' + Date.now(),
+        fecha: new Date().toISOString().split('T')[0],
+        categoria: document.getElementById('m-gasto-cat').value,
+        desc: document.getElementById('m-gasto-desc').value,
+        monto: parseFloat(document.getElementById('m-gasto-monto').value)
+      });
+
+      window.cerrarModalGasto();
+      window.renderizarGastosAdmin();
+      window.calcularEstadoResultados();
+      alert("Gasto asentado.");
+    };
+
+    // AJUSTES
     window.guardarPinsAdmin = function() {
       var pM = document.getElementById('set-pin-miguel').value;
       var pD = document.getElementById('set-pin-diego').value;
@@ -1058,56 +2025,13 @@
       alert(`PINs guardados:\n- Bodega: ${pb}\n- Preventa: ${pp}`);
     };
 
-    // GASTOS Y AUDITORÍA
-    window.renderizarGastosAdmin = function() {
-      var tbody = document.getElementById('tabla-gastos-body');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      gastosOperativos.forEach(function(g, idx) {
-        var tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
-        tr.innerHTML = `
-          <td class="p-3.5 font-bold">${g.fecha}</td>
-          <td class="p-3.5 uppercase font-bold text-[10px] text-amber-800">${g.categoria}</td>
-          <td class="p-3.5">${g.desc}</td>
-          <td class="p-3.5 text-right font-black text-rose-700">$${g.monto.toLocaleString()}</td>
-          <td class="p-3.5 text-center">
-            <button type="button" onclick="gastosOperativos.splice(${idx}, 1); window.renderizarGastosAdmin(); window.calcularEstadoResultados();" class="text-rose-500 font-bold">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    };
-
-    window.renderizarAuditoriaFacturas = function() {
-      var tbody = document.getElementById('tabla-auditoria-facturas-body');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      facturasAuditoria.forEach(function(f, idx) {
-        var tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
-        tr.innerHTML = `
-          <td class="p-3.5 font-mono font-bold text-slate-900">${f.codigo}</td>
-          <td class="p-3.5">${f.tipo}</td>
-          <td class="p-3.5 font-bold">${f.cliente}</td>
-          <td class="p-3.5 text-right font-black text-slate-900">$${f.total.toLocaleString()}</td>
-          <td class="p-3.5 text-center">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${f.estado === 'anulada' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
-              ${f.estado === 'anulada' ? 'Anulada' : 'Vigente'}
-            </span>
-          </td>
-          <td class="p-3.5 text-center">
-            ${f.estado === 'anulada' ? '<span class="text-slate-400 italic">Sin acciones</span>' : `<button type="button" onclick="facturasAuditoria[${idx}].estado='anulada'; window.renderizarAuditoriaFacturas(); window.calcularEstadoResultados();" class="px-3 py-1 bg-rose-600 text-white font-bold rounded-lg text-xs">Anular Documento</button>`}
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    };
-
     window.exportarInformeExcel = function() {
       var csv = "Codigo,Tipo,Cliente,Total,CMV,Estado\n";
       facturasAuditoria.forEach(f => {
         csv += `${f.codigo},"${f.tipo}","${f.cliente}",${f.total},${f.cmv},${f.estado}\n`;
+      });
+      remisionesRepartidores.forEach(r => {
+        csv += `${r.codigo},"Ruta Movil","${r.cliente}",${r.total},0,"emitida"\n`;
       });
       var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       var link = document.createElement("a");
@@ -1122,30 +2046,12 @@
       document.getElementById('filtro-fecha-desde').value = '2026-09-01';
       document.getElementById('filtro-fecha-hasta').value = hoy;
 
-      productosAdmin = [
-        { id: 'KO-001', sku: 'KO-001', nombre: 'Coca-Cola 1.5 Lt (1.5 Lt)', factor: 12, costo: 65000, mostrador: 77000, mayorista: 75000, pronto: 73000, unidad: 7500, stock: 700 },
-        { id: 'KO-002', sku: 'KO-002', nombre: 'Coca-Cola 3 Lt (3 Lt)', factor: 6, costo: 59000, mostrador: 70000, mayorista: 68000, pronto: 66000, unidad: 13000, stock: 650 },
-        { id: 'KO-003', sku: 'KO-003', nombre: 'Coca-Cola P400 (Personal 400 ml)', factor: 12, costo: 28000, mostrador: 34000, mayorista: 33000, pronto: 32000, unidad: 3500, stock: 800 },
-        { id: 'KO-006', sku: 'KO-006', nombre: 'Coca-Cola Lata (Lata 330 ml)', factor: 12, costo: 32000, mostrador: 38000, mayorista: 37000, pronto: 36000, unidad: 4000, stock: 750 },
-        { id: 'KO-028', sku: 'KO-028', nombre: 'Monster Violet 473 ml (Lata 473 ml)', factor: 24, costo: 142000, mostrador: 168000, mayorista: 165000, pronto: 162000, unidad: 8500, stock: 600 }
-      ];
-
-      inventarioInicialHistorico = productosAdmin.map(p => ({
-        sku: p.sku,
-        nombre: p.nombre,
-        factor: p.factor,
-        pacas_iniciales: p.stock,
-        unidades_totales: p.stock * p.factor,
-        costo_paca: p.costo,
-        valor_total: p.stock * p.costo,
-        fecha: '2026-09-01'
-      }));
-
       window.calcularEstadoResultados();
       window.renderizarProductosAdmin();
       window.renderizarInvInicial();
       window.renderizarClientesAdmin();
       window.renderizarEquipoAdmin();
+      window.renderizarRemisionesRepartidores();
       window.renderizarGastosAdmin();
       window.renderizarAuditoriaFacturas();
     });
